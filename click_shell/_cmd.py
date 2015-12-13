@@ -1,0 +1,98 @@
+from __future__ import absolute_import
+
+import os
+from cmd import Cmd
+
+import click
+
+try:
+    import readline
+except ImportError:
+    readline = None
+
+
+class ClickCmd(Cmd, object):
+    """
+    A simple wrapper around the builtin python cmd module that:
+    1) makes completion work on OSX
+    2) uses a history file
+    3) uses click.echo instead of std*.write()
+    4) turns Cmd into a new-style python object :)
+    """
+
+    def __init__(self, hist_file=None, *args, **kwargs):
+        super(ClickCmd, self).__init__(*args, **kwargs)
+        self.old_completer = None
+
+        if hist_file is None:
+            hist_file = os.path.join(os.path.expanduser('~'), '.click-history')
+
+        self.hist_file = hist_file
+
+    def preloop(self):
+        # read our history
+        if readline:
+            try:
+                readline.read_history_file(self.hist_file)
+            except IOError:
+                pass
+
+    def postloop(self):
+        # Write our history
+        if readline:
+            readline.write_history_file(self.hist_file)
+
+    # We need to override this to fix readline
+    def cmdloop(self, intro=None):
+        self.preloop()
+        if self.use_rawinput and self.completekey and readline:
+            self.old_completer = readline.get_completer()
+            readline.set_completer(self.complete)
+            if 'libedit' in readline.__doc__:
+                # For mac OSX
+                readline.parse_and_bind('bind ^I rl_complete')
+            else:
+                # for other platforms
+                readline.parse_and_bind(self.completekey + ': complete')
+        try:
+            if intro is not None:
+                self.intro = intro
+            if self.intro:
+                click.echo(self.intro, file=self.stdout)
+            stop = None
+            while not stop:
+                if self.cmdqueue:
+                    line = self.cmdqueue.pop(0)
+                else:
+                    if self.use_rawinput:
+                        try:
+                            line = raw_input(self.prompt)
+                        except EOFError:
+                            # We just want to quit here instead of changing the arg to
+                            click.echo(file=self.stdout)
+                            break
+                    else:
+                        click.echo(self.prompt, file=self.stdout)
+                        line = self.stdin.readline()
+                        if not len(line):
+                            line = 'EOF'
+                        else:
+                            line = line.rstrip('\r\n')
+                line = self.precmd(line)
+                stop = self.onecmd(line)
+                stop = self.postcmd(stop, line)
+
+        finally:
+            self.postloop()
+            if self.use_rawinput and self.completekey and readline:
+                readline.set_completer(self.old_completer)
+
+    def emptyline(self):
+        # we don't want to repeat the last command if nothing was typed
+        return False
+
+    def do_quit(self, arg):
+        return True
+
+    def do_exit(self, arg):
+        return True
