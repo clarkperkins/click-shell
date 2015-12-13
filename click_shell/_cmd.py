@@ -20,6 +20,9 @@ class ClickCmd(Cmd, object):
     4) turns Cmd into a new-style python object :)
     """
 
+    nohelp = "No help on %s"
+    nocommand = "Command not found: %s"
+
     def __init__(self, hist_file=None, *args, **kwargs):
         super(ClickCmd, self).__init__(*args, **kwargs)
         self.old_completer = None
@@ -90,6 +93,33 @@ class ClickCmd(Cmd, object):
     def emptyline(self):
         # we don't want to repeat the last command if nothing was typed
         return False
+
+    def default(self, line):
+         click.echo(self.nocommand % line, file=self.stdout)
+
+    def do_help(self, arg):
+        # Override to give better error message
+        if arg:
+            try:
+                func = getattr(self, 'help_' + arg)
+            except AttributeError:
+                try:
+                    do_fun = getattr(self, 'do_' + arg, None)
+
+                    if do_fun is None:
+                        click.echo(self.nocommand % arg, file=self.stdout)
+
+                    doc = do_fun.__doc__
+                    if doc:
+                        click.echo(doc, file=self.stdout)
+                        return
+                except AttributeError:
+                    pass
+                click.echo(self.nohelp % arg, file=self.stdout)
+                return
+            func()
+        else:
+            return super(ClickCmd, self).do_help(arg)
 
     def do_quit(self, arg):
         return True

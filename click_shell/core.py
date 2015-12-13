@@ -62,7 +62,7 @@ def get_help(command):
 
 def get_click_shell(command, prompt=None, intro=None):
 
-    # Create our ClickShell class (just a pass for now in case we want to override things later
+    # Create our ClickShell class (just a pass for now in case we want to override things later)
     class ClickShell(ClickCmd):
         pass
 
