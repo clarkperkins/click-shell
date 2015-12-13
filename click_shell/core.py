@@ -1,13 +1,9 @@
 
-import os
 import shlex
 
 import click
 
 from ._cmd import ClickCmd
-
-
-HIST_FILE = os.path.join(os.path.expanduser('~'), '.stackdio-cli', 'history')
 
 
 def get_invoke(command):
@@ -60,7 +56,7 @@ def get_help(command):
     return help
 
 
-def get_click_shell(command, prompt=None, intro=None):
+def get_click_shell(command, prompt=None, intro=None, hist_file=None):
 
     # Create our ClickShell class (just a pass for now in case we want to override things later)
     class ClickShell(ClickCmd):
@@ -78,4 +74,4 @@ def get_click_shell(command, prompt=None, intro=None):
         setattr(ClickShell, 'do_%s' % cmd_name, get_invoke(command))
         setattr(ClickShell, 'help_%s' % cmd_name, get_help(command))
 
-    return ClickShell()
+    return ClickShell(hist_file=hist_file)
