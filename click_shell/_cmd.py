@@ -108,6 +108,7 @@ class ClickCmd(Cmd, object):
 
                     if do_fun is None:
                         click.echo(self.nocommand % arg, file=self.stdout)
+                        return
 
                     doc = do_fun.__doc__
                     if doc:
