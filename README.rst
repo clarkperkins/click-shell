@@ -2,6 +2,8 @@ click-shell
 ===========
 
 click-shell is an extension to `click`_ that easily turns your click app into a shell utility.
+It is built on top of the built in python `cmd`_ module, with modifications to make it work
+with click.
 
 Usage
 -----
@@ -23,8 +25,7 @@ Simply add the following to your root level click group:
 
 .. note::
 
-    * You *must* add ``invoke_without_command=True`` to the ``@click.group`` decorator in order
-        for the shell to start up when no command is specified
+    * You *must* add ``invoke_without_command=True`` to the ``@click.group`` decorator in order for the shell to start up when no command is specified
     * The function *must* be decorated with ``@click.pass_context`` and have a ``ctx`` argument
 
 
@@ -38,3 +39,4 @@ When run, you should expect an output like so:
 
 
 .. _click: http://click.pocoo.org/
+.. _cmd: https://docs.python.org/2/library/cmd.html
