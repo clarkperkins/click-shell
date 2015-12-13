@@ -6,9 +6,10 @@ import click
 from ._cmd import ClickCmd
 
 
-def get_invoke(command):
+def get_invoke(root_ctx, command):
     """
     Get the Cmd main method from the click command
+    :param root_ctx: The root context object
     :param command: The click Command object
     :return: the do_* method for Cmd
     :rtype: function
@@ -20,7 +21,8 @@ def get_invoke(command):
         try:
             rv = command.main(args=shlex.split(arg),
                               prog_name=command.name,
-                              standalone_mode=False)
+                              standalone_mode=False,
+                              parent=root_ctx)
             return rv
         except click.ClickException as e:
             # Show the error message
@@ -35,9 +37,10 @@ def get_invoke(command):
     return invoke
 
 
-def get_help(command):
+def get_help(root_ctx, command):
     """
     Get the Cmd help function from the click command
+    :param root_ctx: The root context object
     :param command: The click Command object
     :return: the help_* method for Cmd
     :rtype: function
@@ -51,12 +54,12 @@ def get_help(command):
                 extra[key] = value
 
         # Print click's help message
-        with click.Context(command, info_name=command.name, **extra) as ctx:
+        with click.Context(command, info_name=command.name, parent=root_ctx, **extra) as ctx:
             click.echo(ctx.get_help(), color=ctx.color)
     return help
 
 
-def get_click_shell(command, prompt=None, intro=None, hist_file=None):
+def make_click_shell(root_ctx, prompt=None, intro=None, hist_file=None):
 
     # Create our ClickShell class (just a pass for now in case we want to override things later)
     class ClickShell(ClickCmd):
@@ -69,9 +72,9 @@ def get_click_shell(command, prompt=None, intro=None, hist_file=None):
         ClickShell.intro = intro
 
     # set all the click commands
-    for name, command in command.commands.items():
+    for name, command in root_ctx.command.commands.items():
         cmd_name = name.replace('-', '_')
-        setattr(ClickShell, 'do_%s' % cmd_name, get_invoke(command))
-        setattr(ClickShell, 'help_%s' % cmd_name, get_help(command))
+        setattr(ClickShell, 'do_%s' % cmd_name, get_invoke(root_ctx, command))
+        setattr(ClickShell, 'help_%s' % cmd_name, get_help(root_ctx, command))
 
     return ClickShell(hist_file=hist_file)
