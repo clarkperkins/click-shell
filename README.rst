@@ -23,9 +23,9 @@ Simply add the following to your root level click group:
 
 .. note::
 
-    1. You *must* add ``invoke_without_command=True`` to the ``@click.group`` decorator in order
+    * You *must* add ``invoke_without_command=True`` to the ``@click.group`` decorator in order
         for the shell to start up when no command is specified
-    2. The function *must* be decorated with ``@click.pass_context`` and have a ``ctx`` argument
+    * The function *must* be decorated with ``@click.pass_context`` and have a ``ctx`` argument
 
 
 When run, you should expect an output like so:
