@@ -17,17 +17,10 @@ Simply add the following to your root level click group:
     from click_shell import shell
 
     @click.group(invoke_without_command=True)
-    @click.pass_context
+    @click.pass_context # Don't forget this
     @shell(prompt='my-app > ', intro='Starting my app...')  # Our shell decorator
     def my_app(ctx):
         pass
-
-
-.. note::
-
-    - You *must* add ``invoke_without_command=True`` to the ``@click.group`` decorator in order
-      for the shell to start up when no command is specified
-    - The function *must* be decorated with ``@click.pass_context`` and have a ``ctx`` argument
 
 
 When run, you should expect an output like so:
