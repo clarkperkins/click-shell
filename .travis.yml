@@ -1,0 +1,40 @@
+language: python
+
+python:
+  - "2.6"
+  - "2.7"
+  - "3.2"
+  - "3.3"
+  - "3.4"
+  - "3.5"
+
+cache:
+  directories:
+    - $HOME/.cache/pip
+
+# Set up our environment
+env:
+  NOSE_WITH_XUNIT: 1
+  NOSE_WITH_COVERAGE: 1
+  NOSE_COVER_BRANCHES: 1
+  NOSE_COVER_INCLUSIVE: 1
+
+# So that we get a docker container
+sudo: false
+
+## Customize dependencies
+install:
+  - pip install -U pip
+  - pip install -U wheel
+  - pip install -U -e .[testing]
+
+## Customize test commands - just a pep8 and pylint check for now
+script:
+  - pep8 click_shell
+  - pylint click_shell
+
+# Only build artifacts on success
+after_success:
+  - coveralls
+  - python setup.py sdist
+  - python setup.py bdist_wheel

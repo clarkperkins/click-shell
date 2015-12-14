@@ -1,3 +1,9 @@
+"""
+click_shell.decorators
+
+Decorators to make using click_shell simpler and more similar to click.
+"""
+
 
 import click
 

@@ -1,3 +1,9 @@
+"""
+click_shell.core
+
+Core functionality for click-shell
+"""
+
 
 import shlex
 
@@ -17,13 +23,13 @@ def get_invoke(root_ctx, command):
 
     assert isinstance(command, click.Command)
 
-    def invoke(self, arg):
+    def invoke_(self, arg):  # pylint: disable=unused-argument
         try:
-            rv = command.main(args=shlex.split(arg),
-                              prog_name=command.name,
-                              standalone_mode=False,
-                              parent=root_ctx)
-            return rv
+            ret = command.main(args=shlex.split(arg),
+                               prog_name=command.name,
+                               standalone_mode=False,
+                               parent=root_ctx)
+            return ret
         except click.ClickException as e:
             # Show the error message
             e.show()
@@ -34,7 +40,7 @@ def get_invoke(root_ctx, command):
             # Catch this an return the code instead. All of click's help commands do a sys.exit(),
             # and that's not ideal when running in a shell.
             return e.code
-    return invoke
+    return invoke_
 
 
 def get_help(root_ctx, command):
@@ -47,7 +53,7 @@ def get_help(root_ctx, command):
     """
     assert isinstance(command, click.Command)
 
-    def help(self):
+    def help_(self):  # pylint: disable=unused-argument
         extra = {}
         for key, value in command.context_settings.items():
             if key not in extra:
@@ -56,7 +62,7 @@ def get_help(root_ctx, command):
         # Print click's help message
         with click.Context(command, info_name=command.name, parent=root_ctx, **extra) as ctx:
             click.echo(ctx.get_help(), color=ctx.color)
-    return help
+    return help_
 
 
 def make_click_shell(root_ctx, prompt=None, intro=None, hist_file=None):

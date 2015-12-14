@@ -1,14 +1,18 @@
-from __future__ import absolute_import
+"""
+click_shell._cmd
+
+This module overrides the builtin python cmd module
+"""
 
 import os
 from cmd import Cmd
-
-import click
 
 try:
     import readline
 except ImportError:
     readline = None
+
+import click
 
 
 class ClickCmd(Cmd, object):
@@ -46,7 +50,7 @@ class ClickCmd(Cmd, object):
             readline.write_history_file(self.hist_file)
 
     # We need to override this to fix readline
-    def cmdloop(self, intro=None):
+    def cmdloop(self, intro=None):  # pylint: disable=too-many-branches
         self.preloop()
         if self.use_rawinput and self.completekey and readline:
             self.old_completer = readline.get_completer()
@@ -66,21 +70,20 @@ class ClickCmd(Cmd, object):
             while not stop:
                 if self.cmdqueue:
                     line = self.cmdqueue.pop(0)
+                elif self.use_rawinput:
+                    try:
+                        line = raw_input(self.prompt)
+                    except EOFError:
+                        # We just want to quit here instead of changing the arg to
+                        click.echo(file=self.stdout)
+                        break
                 else:
-                    if self.use_rawinput:
-                        try:
-                            line = raw_input(self.prompt)
-                        except EOFError:
-                            # We just want to quit here instead of changing the arg to
-                            click.echo(file=self.stdout)
-                            break
+                    click.echo(self.prompt, file=self.stdout)
+                    line = self.stdin.readline()
+                    if not len(line):
+                        line = 'EOF'
                     else:
-                        click.echo(self.prompt, file=self.stdout)
-                        line = self.stdin.readline()
-                        if not len(line):
-                            line = 'EOF'
-                        else:
-                            line = line.rstrip('\r\n')
+                        line = line.rstrip('\r\n')
                 line = self.precmd(line)
                 stop = self.onecmd(line)
                 stop = self.postcmd(stop, line)
@@ -95,7 +98,7 @@ class ClickCmd(Cmd, object):
         return False
 
     def default(self, line):
-         click.echo(self.nocommand % line, file=self.stdout)
+        click.echo(self.nocommand % line, file=self.stdout)
 
     def do_help(self, arg):
         # Override to give better error message
@@ -122,8 +125,8 @@ class ClickCmd(Cmd, object):
         else:
             return super(ClickCmd, self).do_help(arg)
 
-    def do_quit(self, arg):
+    def do_quit(self, arg):  # pylint: disable=unused-argument,no-self-use
         return True
 
-    def do_exit(self, arg):
+    def do_exit(self, arg):  # pylint: disable=unused-argument,no-self-use
         return True
