@@ -19,7 +19,7 @@ PY3 = sys.version_info[0] == 3
 
 # python 3 compatibility
 if PY3:
-    raw_input = input
+    raw_input = input  # pylint: disable=invalid-name
 
 
 class ClickCmd(Cmd, object):
