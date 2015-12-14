@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 # Set version
 __version__ = '0.0.0'  # Explicit default
-with open('click_shell/__init__.py') as f:
+with open('click_shell/version.py') as f:
     exec(f.read())
 
 
