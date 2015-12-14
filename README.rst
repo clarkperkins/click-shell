@@ -10,19 +10,23 @@ with click.
 Usage
 -----
 
-Simply add the following to your root level click group:
+Simply replace ``@click.group`` with ``@click_shell.shell`` on the root level command:
 
 
 .. code-block:: python
 
-    import click
     from click_shell import shell
 
-    @click.group(invoke_without_command=True)
-    @click.pass_context # Don't forget this
-    @shell(prompt='my-app > ', intro='Starting my app...')  # Our shell decorator
+    # @click.group()  # no longer
+    @shell(prompt='my-app > ', intro='Starting my app...')
     def my_app(ctx):
         pass
+
+    @my_app.command()
+    def the_command():
+        print 'the_command is running'
+
+    ...
 
 
 When run, you should expect an output like so:

@@ -4,19 +4,19 @@ click_shell.decorators
 Decorators to make using click_shell simpler and more similar to click.
 """
 
-
 import click
 
 from .core import make_click_shell
 
 
-def shell(prompt=None, intro=None, hist_file=None):
+def shell(prompt=None, intro=None, hist_file=None, **attrs):
     def wrapper(func):
-        def inner_func(ctx, *args, **kwargs):
-            assert isinstance(ctx, click.Context), (
-                'Make sure your root level group is decorated with '
-                '`@click.pass_context` and has `ctx` as the first argument'
-            )
+
+        # We're going to drop this in to the group as it's callback
+        def new_func(*args, **kwargs):
+
+            # Grab the current context (this is what @click.pass_context does)
+            ctx = click.get_current_context()
 
             if ctx.invoked_subcommand is None:
                 # If there's no command, launch a shell
@@ -29,7 +29,10 @@ def shell(prompt=None, intro=None, hist_file=None):
                 shell_obj.cmdloop()
 
             # Be sure to call the original func
-            func(ctx, *args, **kwargs)
+            func(*args, **kwargs)
 
-        return inner_func
+        # Override this param
+        attrs.setdefault('invoke_without_command', True)
+
+        return click.group(**attrs)(new_func)
     return wrapper
