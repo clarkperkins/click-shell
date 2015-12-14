@@ -27,9 +27,12 @@ install:
   - pip install -U -e .[testing]
 
 ## Customize test commands - just a pep8 and pylint check for now
-script:
+before_script:
   - pep8 click_shell
   - pylint click_shell
+
+script:
+  - date
 
 # Only build artifacts on success
 after_success:
