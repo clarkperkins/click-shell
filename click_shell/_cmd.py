@@ -5,6 +5,7 @@ This module overrides the builtin python cmd module
 """
 
 import os
+import sys
 from cmd import Cmd
 
 try:
@@ -13,6 +14,12 @@ except ImportError:
     readline = None
 
 import click
+
+PY3 = sys.version_info[0] == 3
+
+# python 3 compatibility
+if PY3:
+    raw_input = input
 
 
 class ClickCmd(Cmd, object):
