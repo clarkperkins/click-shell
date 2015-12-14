@@ -38,6 +38,14 @@ When run, you should expect an output like so:
     my-app >
 
 
+.. note::
+
+    It should be noted that this decorator **only** alters functionality if no arguments are
+    passed on the command line.  If you try to run a command directly
+    (like ``python my_app.py the_command`` in the above example), your app will function
+    identically to how it did before.
+
+
 For more advanced usage, check out our docs at http://click-shell.readthedocs.org/
 
 .. _click: http://click.pocoo.org/
