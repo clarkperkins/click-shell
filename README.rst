@@ -1,6 +1,8 @@
 click-shell
 ===========
 
+|Travis CI|
+
 click-shell is an extension to `click`_ that easily turns your click app into a shell utility.
 It is built on top of the built in python `cmd`_ module, with modifications to make it work
 with click.
@@ -34,3 +36,7 @@ When run, you should expect an output like so:
 
 .. _click: http://click.pocoo.org/
 .. _cmd: https://docs.python.org/2/library/cmd.html
+
+.. |Travis CI| image:: https://travis-ci.org/clarkperkins/click-shell.svg?branch=master
+   :target: https://travis-ci.org/clarkperkins/click-shell
+   :alt: Build status
