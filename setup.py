@@ -21,7 +21,7 @@ requirements = [
 testing_requirements = [
     'coveralls',
     'pep8',
-    'pylint<=1.2.0',
+    'pylint>=1.5,<1.6',
 ]
 
 
