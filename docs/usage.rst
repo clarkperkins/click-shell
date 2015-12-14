@@ -1,6 +1,7 @@
 Usage
 =====
 
+There are 2 main ways to utilize click-shell: the decorator and the factory method.
 
 Decorator
 ---------
@@ -35,8 +36,8 @@ When run, you should expect an output like so:
     my-app >
 
 
-Manual Creation
----------------
+Factory Method
+--------------
 
 If you'd rather not use decorators (or can't for some reason), you can manually create a shell
 object and start it up:
