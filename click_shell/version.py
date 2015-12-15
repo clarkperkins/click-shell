@@ -64,7 +64,7 @@ def get_git_changeset():
                                shell=True, cwd=repo_dir, universal_newlines=True)
     timestamp = git_log.communicate()[0]
     try:
-        timestamp = datetime.datetime.utcfromtimestamp(int(timestamp))
+        timestamp = datetime.datetime.utcfromtimestamp(int(timestamp))  # pylint: disable=redefined-variable-type
         return timestamp.strftime('%Y%m%d%H%M%S')
     except ValueError:
         return None
