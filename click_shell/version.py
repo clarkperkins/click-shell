@@ -65,9 +65,8 @@ def get_git_changeset():
     timestamp = git_log.communicate()[0]
     try:
         timestamp = datetime.datetime.utcfromtimestamp(int(timestamp))
+        return timestamp.strftime('%Y%m%d%H%M%S')
     except ValueError:
         return None
-    return timestamp.strftime('%Y%m%d%H%M%S')
-
 
 __version__ = get_version(VERSION)
