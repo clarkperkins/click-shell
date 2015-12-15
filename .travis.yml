@@ -28,8 +28,8 @@ install:
 
 ## Customize test commands - just a pep8 and pylint check for now
 before_script:
-  - pep8 click_shell
-  - pylint click_shell
+  - pep8 click_shell && echo 'pep8 success' || echo 'pep8 failure'
+  - pylint click_shell && echo 'pylint success' || echo 'pylint failure'
 
 script:
   - date
