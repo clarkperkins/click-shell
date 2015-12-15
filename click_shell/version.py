@@ -27,8 +27,10 @@ def get_version(version):
 
     assert len(version) == 5
 
+    version_parts = version[:2] if version[2] == 0 else version[:3]
+
     # Build the first part of the version
-    major = '.'.join(str(x) for x in version[:3])
+    major = '.'.join(str(x) for x in version_parts)
 
     # Just return it if this is a final release version
     if version[3] == 'final':
