@@ -84,6 +84,11 @@ class ClickCmd(Cmd, object):
                         # We just want to quit here instead of changing the arg to
                         click.echo(file=self.stdout)
                         break
+                    except KeyboardInterrupt:
+                        # We don't want to exit the shell on a keyboard interrupt
+                        click.echo(file=self.stdout)
+                        click.echo('KeyboardInterrupt', file=self.stdout)
+                        continue
                 else:
                     click.echo(self.prompt, file=self.stdout)
                     line = self.stdin.readline()
