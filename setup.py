@@ -28,7 +28,7 @@ testing_requirements = [
 setup(
     name='click-shell',
     version=__version__,
-    url='http://github.com/clarkperkins/click-shell',
+    url='https://github.com/clarkperkins/click-shell',
     author='Clark Perkins',
     author_email='r.clark.perkins@gmail.com',
     description=SHORT_DESCRIPTION,
