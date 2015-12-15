@@ -33,7 +33,7 @@ setup(
     author_email='r.clark.perkins@gmail.com',
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
-    license='Apache 2.0',
+    license='BSD',
     include_package_data=True,
     packages=find_packages(),
     zip_safe=False,
@@ -49,11 +49,10 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.2',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5'
     ]
 )
