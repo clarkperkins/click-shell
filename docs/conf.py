@@ -68,7 +68,7 @@ author = u'Clark Perkins'
 # built documents.
 #
 # The short X.Y version.
-version = '.'.join([str(v) for v in VERSION[:2]])
+version = str(VERSION[0])
 # The full version, including alpha/beta/rc tags.
 release = __version__
 
