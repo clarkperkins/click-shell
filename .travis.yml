@@ -31,8 +31,9 @@ before_script:
   - pep8 click_shell && echo 'pep8 success' || echo 'pep8 failure'
   - pylint click_shell && echo 'pylint success' || echo 'pylint failure'
 
+# Run our tests
 script:
-  - date
+  - py.test --cov-report=html --cov-report=xml --cov=click_shell tests
 
 # Only build artifacts on success
 after_success:

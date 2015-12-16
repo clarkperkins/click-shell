@@ -103,6 +103,7 @@ def get_complete(root_ctx, command):
 
 
 def make_click_shell(root_ctx, prompt=None, intro=None, hist_file=None):
+    assert isinstance(root_ctx.command, click.MultiCommand)
 
     # Create our ClickShell class (just a pass for now in case we want to override things later)
     class ClickShell(ClickCmd):

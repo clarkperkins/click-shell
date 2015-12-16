@@ -22,6 +22,8 @@ testing_requirements = [
     'coveralls',
     'pep8',
     'pylint>=1.5,<1.6',
+    'pytest>=2.8,<2.9',
+    'pytest-cov>=2.2,<2.3',
 ]
 
 
