@@ -33,6 +33,7 @@ def get_invoke(root_ctx, command):
         except click.ClickException as e:
             # Show the error message
             e.show()
+            return e.exit_code
         except click.Abort:
             # We got an EOF or Keyboard interrupt.  Just silence it
             pass
@@ -102,8 +103,9 @@ def get_complete(root_ctx, command):
     return complete_
 
 
-def make_click_shell(root_ctx, prompt=None, intro=None, hist_file=None):
-    assert isinstance(root_ctx.command, click.MultiCommand)
+def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
+    assert isinstance(ctx, click.Context)
+    assert isinstance(ctx.command, click.MultiCommand)
 
     # Create our ClickShell class (just a pass for now in case we want to override things later)
     class ClickShell(ClickCmd):
@@ -116,11 +118,12 @@ def make_click_shell(root_ctx, prompt=None, intro=None, hist_file=None):
         ClickShell.intro = intro
 
     # set all the click commands
-    for name, command in root_ctx.command.commands.items():
+    for name in ctx.command.list_commands(ctx):
+        command = ctx.command.get_command(ctx, name)
         cmd_name = name.replace('-', '_')
-        setattr(ClickShell, 'do_%s' % cmd_name, get_invoke(root_ctx, command))
-        setattr(ClickShell, 'help_%s' % cmd_name, get_help(root_ctx, command))
-        setattr(ClickShell, 'complete_%s' % cmd_name, get_complete(root_ctx, command))
+        setattr(ClickShell, 'do_%s' % cmd_name, get_invoke(ctx, command))
+        setattr(ClickShell, 'help_%s' % cmd_name, get_help(ctx, command))
+        setattr(ClickShell, 'complete_%s' % cmd_name, get_complete(ctx, command))
 
     return ClickShell(hist_file=hist_file)
 
