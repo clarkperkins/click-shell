@@ -120,10 +120,9 @@ def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
     # set all the click commands
     for name in ctx.command.list_commands(ctx):
         command = ctx.command.get_command(ctx, name)
-        cmd_name = name.replace('-', '_')
-        setattr(ClickShell, 'do_%s' % cmd_name, get_invoke(ctx, command))
-        setattr(ClickShell, 'help_%s' % cmd_name, get_help(ctx, command))
-        setattr(ClickShell, 'complete_%s' % cmd_name, get_complete(ctx, command))
+        setattr(ClickShell, 'do_%s' % name, get_invoke(ctx, command))
+        setattr(ClickShell, 'help_%s' % name, get_help(ctx, command))
+        setattr(ClickShell, 'complete_%s' % name, get_complete(ctx, command))
 
     return ClickShell(hist_file=hist_file)
 
@@ -145,6 +144,6 @@ class Shell(click.Group):
         if not ctx.protected_args and not ctx.invoked_subcommand:
             # Start up the shell
             shell = make_click_shell(ctx, self.prompt, self.intro, self.hist_file)
-            shell.cmdloop()
+            return shell.cmdloop()
 
         return ret

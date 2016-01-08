@@ -31,6 +31,9 @@ class ClickCmd(Cmd, object):
     4) turns Cmd into a new-style python object :)
     """
 
+    # Allow dashes
+    identchars = Cmd.identchars + '-'
+
     nohelp = "No help on %s"
     nocommand = "Command not found: %s"
 
@@ -81,7 +84,7 @@ class ClickCmd(Cmd, object):
                     try:
                         line = raw_input(self.prompt)
                     except EOFError:
-                        # We just want to quit here instead of changing the arg to
+                        # We just want to quit here instead of changing the arg to EOF
                         click.echo(file=self.stdout)
                         break
                     except KeyboardInterrupt:
@@ -142,3 +145,11 @@ class ClickCmd(Cmd, object):
 
     def do_exit(self, arg):  # pylint: disable=unused-argument,no-self-use
         return True
+
+    def print_topics(self, header, cmds, cmdlen, maxcol):
+        if cmds:
+            click.echo(header, file=self.stdout)
+            if self.ruler:
+                click.echo(str(self.ruler * len(header)), file=self.stdout)
+            self.columnize(cmds, maxcol-1)
+            click.echo(file=self.stdout)
