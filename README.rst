@@ -19,7 +19,7 @@ Simply replace ``@click.group`` with ``@click_shell.shell`` on the root level co
 
     # @click.group()  # no longer
     @shell(prompt='my-app > ', intro='Starting my app...')
-    def my_app(ctx):
+    def my_app():
         pass
 
     @my_app.command()

@@ -10,13 +10,6 @@ cache:
   directories:
     - $HOME/.cache/pip
 
-# Set up our environment
-env:
-  NOSE_WITH_XUNIT: 1
-  NOSE_WITH_COVERAGE: 1
-  NOSE_COVER_BRANCHES: 1
-  NOSE_COVER_INCLUSIVE: 1
-
 # So that we get a docker container
 sudo: false
 
