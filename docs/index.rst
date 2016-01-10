@@ -5,6 +5,9 @@ click-shell is an extension to `click`_ that easily turns your click app into a 
 It is built on top of the built in python `cmd`_ module, with modifications to make it work
 with click.
 
+click-shell is compatible with python versions 2.6, 2.7, 3.3, 3.4, and 3.5.
+
+
 .. note::
 
     It should be noted that click-shell **only** alters functionality if no arguments are
