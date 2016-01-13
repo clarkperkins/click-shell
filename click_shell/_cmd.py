@@ -5,7 +5,6 @@ This module overrides the builtin python cmd module
 """
 
 import os
-import sys
 from cmd import Cmd
 
 try:
@@ -14,12 +13,7 @@ except ImportError:
     readline = None
 
 import click
-
-PY3 = sys.version_info[0] == 3
-
-# python 3 compatibility
-if PY3:
-    raw_input = input  # pylint: disable=invalid-name,redefined-builtin
+from click._compat import raw_input as get_input
 
 
 class ClickCmd(Cmd, object):
@@ -62,15 +56,14 @@ class ClickCmd(Cmd, object):
     # We need to override this to fix readline
     def cmdloop(self, intro=None):  # pylint: disable=too-many-branches
         self.preloop()
-        if self.use_rawinput and self.completekey and readline:
+        if self.completekey and readline:
             self.old_completer = readline.get_completer()
             readline.set_completer(self.complete)
+            to_parse = self.completekey + ': complete'
             if 'libedit' in readline.__doc__:
-                # For mac OSX
-                readline.parse_and_bind('bind ^I rl_complete')
-            else:
-                # for other platforms
-                readline.parse_and_bind(self.completekey + ': complete')
+                # Special case for mac OSX
+                to_parse = 'bind ^I rl_complete'
+            readline.parse_and_bind(to_parse)
         try:
             if intro is not None:
                 self.intro = intro
@@ -80,9 +73,9 @@ class ClickCmd(Cmd, object):
             while not stop:
                 if self.cmdqueue:
                     line = self.cmdqueue.pop(0)
-                elif self.use_rawinput:
+                else:
                     try:
-                        line = raw_input(self.prompt)
+                        line = get_input(self.get_prompt())
                     except EOFError:
                         # We just want to quit here instead of changing the arg to EOF
                         click.echo(file=self.stdout)
@@ -92,21 +85,17 @@ class ClickCmd(Cmd, object):
                         click.echo(file=self.stdout)
                         click.echo('KeyboardInterrupt', file=self.stdout)
                         continue
-                else:
-                    click.echo(self.prompt, file=self.stdout)
-                    line = self.stdin.readline()
-                    if not len(line):
-                        line = 'EOF'
-                    else:
-                        line = line.rstrip('\r\n')
                 line = self.precmd(line)
                 stop = self.onecmd(line)
                 stop = self.postcmd(stop, line)
 
         finally:
             self.postloop()
-            if self.use_rawinput and self.completekey and readline:
+            if self.completekey and readline:
                 readline.set_completer(self.old_completer)
+
+    def get_prompt(self):
+        return self.prompt
 
     def emptyline(self):
         # we don't want to repeat the last command if nothing was typed
@@ -116,29 +105,29 @@ class ClickCmd(Cmd, object):
         click.echo(self.nocommand % line, file=self.stdout)
 
     def do_help(self, arg):
-        # Override to give better error message
-        if arg:
-            try:
-                func = getattr(self, 'help_' + arg)
-            except AttributeError:
-                try:
-                    do_fun = getattr(self, 'do_' + arg, None)
-
-                    if do_fun is None:
-                        click.echo(self.nocommand % arg, file=self.stdout)
-                        return
-
-                    doc = do_fun.__doc__
-                    if doc:
-                        click.echo(doc, file=self.stdout)
-                        return
-                except AttributeError:
-                    pass
-                click.echo(self.nohelp % arg, file=self.stdout)
-                return
-            func()
-        else:
+        if not arg:
             return super(ClickCmd, self).do_help(arg)
+
+        # Override to give better error message
+        try:
+            func = getattr(self, 'help_' + arg)
+        except AttributeError:
+            try:
+                do_fun = getattr(self, 'do_' + arg, None)
+
+                if do_fun is None:
+                    click.echo(self.nocommand % arg, file=self.stdout)
+                    return
+
+                doc = do_fun.__doc__
+                if doc:
+                    click.echo(doc, file=self.stdout)
+                    return
+            except AttributeError:
+                pass
+            click.echo(self.nohelp % arg, file=self.stdout)
+            return
+        func()
 
     def do_quit(self, arg):  # pylint: disable=unused-argument,no-self-use
         return True
