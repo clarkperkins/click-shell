@@ -74,7 +74,7 @@ class TestFactory(object):
         ret = fun(None, '')
 
         # Make sure it returned the correct thing
-        assert ret == time_str
+        assert ret is False
 
     def test_get_invoke_group(self):
         time_str = str(datetime.now())
@@ -103,21 +103,21 @@ class TestFactory(object):
 
         # This should be the help function
         ret = fun(None, '')
-        assert ret == 0
+        assert ret is False
 
         # Also help
         ret = fun(None, '--help')
-        assert ret == 0
+        assert ret is False
 
         # non-existant
         ret = fun(None, 'foobar')
-        assert ret == 2
+        assert ret is False
 
         ret = fun(None, 'foo')
-        assert ret == time_str
+        assert ret is False
 
         ret = fun(None, 'bar')
-        assert ret == 'foo'
+        assert ret is False
 
     def test_get_help(self):
         pass

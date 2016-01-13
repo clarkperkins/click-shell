@@ -25,11 +25,10 @@ def get_invoke(root_ctx, command):
 
     def invoke_(self, arg):  # pylint: disable=unused-argument
         try:
-            ret = command.main(args=shlex.split(arg),
-                               prog_name=command.name,
-                               standalone_mode=False,
-                               parent=root_ctx)
-            return ret
+            command.main(args=shlex.split(arg),
+                         prog_name=command.name,
+                         standalone_mode=False,
+                         parent=root_ctx)
         except click.ClickException as e:
             # Show the error message
             e.show()
@@ -40,6 +39,9 @@ def get_invoke(root_ctx, command):
             # Catch this an return the code instead. All of click's help commands do a sys.exit(),
             # and that's not ideal when running in a shell.
             pass
+
+        # Always return False so the shell doesn't exit
+        return False
     return invoke_
 
 
