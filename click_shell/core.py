@@ -33,14 +33,13 @@ def get_invoke(root_ctx, command):
         except click.ClickException as e:
             # Show the error message
             e.show()
-            return e.exit_code
         except click.Abort:
             # We got an EOF or Keyboard interrupt.  Just silence it
             pass
-        except SystemExit as e:
+        except SystemExit:
             # Catch this an return the code instead. All of click's help commands do a sys.exit(),
             # and that's not ideal when running in a shell.
-            return e.code
+            pass
     return invoke_
 
 
@@ -106,6 +105,9 @@ def get_complete(root_ctx, command):
 def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
     assert isinstance(ctx, click.Context)
     assert isinstance(ctx.command, click.MultiCommand)
+
+    # Set this to None so that it doesn't get printed out in usage messages
+    ctx.info_name = None
 
     # Create our ClickShell class (just a pass for now in case we want to override things later)
     class ClickShell(ClickCmd):
