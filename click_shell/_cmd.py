@@ -38,7 +38,11 @@ class ClickCmd(Cmd, object):
         if hist_file is None:
             hist_file = os.path.join(os.path.expanduser('~'), '.click-history')
 
-        self.hist_file = hist_file
+        self.hist_file = os.path.abspath(hist_file)
+
+        # Make the parent directory
+        if not os.path.isdir(os.path.dirname(self.hist_file)):
+            os.makedirs(os.path.dirname(self.hist_file))
 
     def preloop(self):
         # read our history
