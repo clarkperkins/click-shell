@@ -14,7 +14,7 @@ with open('README.rst') as f:
     LONG_DESCRIPTION = f.read()
 
 requirements = [
-    'click>=6.0,<7.0',
+    'click>=4.0',
     'readline',
 ]
 

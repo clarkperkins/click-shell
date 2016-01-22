@@ -4,12 +4,18 @@ click_shell.core
 Core functionality for click-shell
 """
 
+import logging
 import os
 import shlex
+import traceback
 
 import click
 
 from ._cmd import ClickCmd
+
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 
 def get_invoke(root_ctx, command):
@@ -39,6 +45,9 @@ def get_invoke(root_ctx, command):
             # Catch this an return the code instead. All of click's help commands do a sys.exit(),
             # and that's not ideal when running in a shell.
             pass
+        except Exception as e:
+            traceback.print_exception(type(e), e, None)
+            logger.warn(traceback.format_exc())
 
         # Always return False so the shell doesn't exit
         return False

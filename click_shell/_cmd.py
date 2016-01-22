@@ -51,7 +51,10 @@ class ClickCmd(Cmd, object):
     def postloop(self):
         # Write our history
         if readline:
-            readline.write_history_file(self.hist_file)
+            try:
+                readline.write_history_file(self.hist_file)
+            except IOError:
+                pass
 
     # We need to override this to fix readline
     def cmdloop(self, intro=None):  # pylint: disable=too-many-branches
