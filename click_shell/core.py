@@ -12,10 +12,10 @@ import traceback
 import click
 
 from ._cmd import ClickCmd
-
+from ._compat import NullHandler
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+logger.addHandler(NullHandler())
 
 
 def get_invoke(root_ctx, command):

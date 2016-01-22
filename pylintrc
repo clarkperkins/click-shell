@@ -63,6 +63,7 @@ disable=
     apply-builtin,
     backtick,
     basestring-builtin,
+    broad-except,
     buffer-builtin,
     cmp-builtin,
     cmp-method,
@@ -147,7 +148,7 @@ evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / stateme
 bad-functions=map,filter,input
 
 # Good variable names which should always be accepted, separated by a comma
-good-names=e,f,i,j,k,ex,Run,_
+good-names=e,f,i,j,k,ex,logger,Run,_
 
 # Bad variable names which should always be refused, separated by a comma
 bad-names=foo,bar,baz,toto,tutu,tata
