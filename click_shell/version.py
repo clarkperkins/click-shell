@@ -9,7 +9,7 @@ import os
 import subprocess
 
 
-VERSION = (1, 0, 0, 'dev', 0)
+VERSION = (0, 5, 0, 'dev', 0)
 
 
 def get_version(version):

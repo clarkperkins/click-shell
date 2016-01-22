@@ -38,7 +38,11 @@ class ClickCmd(Cmd, object):
         if hist_file is None:
             hist_file = os.path.join(os.path.expanduser('~'), '.click-history')
 
-        self.hist_file = hist_file
+        self.hist_file = os.path.abspath(hist_file)
+
+        # Make the parent directory
+        if not os.path.isdir(os.path.dirname(self.hist_file)):
+            os.makedirs(os.path.dirname(self.hist_file))
 
     def preloop(self):
         # read our history
@@ -51,7 +55,10 @@ class ClickCmd(Cmd, object):
     def postloop(self):
         # Write our history
         if readline:
-            readline.write_history_file(self.hist_file)
+            try:
+                readline.write_history_file(self.hist_file)
+            except IOError:
+                pass
 
     # We need to override this to fix readline
     def cmdloop(self, intro=None):  # pylint: disable=too-many-branches
