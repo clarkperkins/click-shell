@@ -5,16 +5,16 @@ Core functionality for click-shell
 """
 
 import logging
-import os
 import shlex
 import traceback
 import types
 from functools import update_wrapper
 
 import click
+from click._bashcomplete import resolve_ctx
 
 from ._cmd import ClickCmd
-from ._compat import NullHandler
+from ._compat import NullHandler, get_method_type
 
 logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
@@ -23,7 +23,6 @@ logger.addHandler(NullHandler())
 def get_invoke(command):
     """
     Get the Cmd main method from the click command
-    :param root_ctx: The root context object
     :param command: The click Command object
     :return: the do_* method for Cmd
     :rtype: function
@@ -49,7 +48,7 @@ def get_invoke(command):
             pass
         except Exception as e:
             traceback.print_exception(type(e), e, None)
-            logger.warn(traceback.format_exc())
+            logger.warning(traceback.format_exc())
 
         # Always return False so the shell doesn't exit
         return False
@@ -62,7 +61,6 @@ def get_invoke(command):
 def get_help(command):
     """
     Get the Cmd help function from the click command
-    :param root_ctx: The root context object
     :param command: The click Command object
     :return: the help_* method for Cmd
     :rtype: function
@@ -87,7 +85,6 @@ def get_help(command):
 def get_complete(command):
     """
     Get the Cmd complete function for the click command
-    :param root_ctx: The root context object
     :param command: The click Command object
     :return: the complete_* method for Cmd
     :rtype: function
@@ -95,28 +92,30 @@ def get_complete(command):
 
     assert isinstance(command, click.Command)
 
-    if isinstance(command, click.MultiCommand):
-        # we have a command with subcommands.  Autocomplete them
-        def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
-            return [cmd for cmd in command.list_commands(self.ctx) if cmd.startswith(text)]
-    else:
-        # No subcommands, so complete with filenames
-        def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
-            dir_name, file_name = os.path.split(text)
+    def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
+        split = shlex.split(line)
+        if line.endswith(' '):
+            incomplete = ''
+            args = split
+        else:
+            incomplete = split[-1]
+            args = split[:-1]
 
-            final_list = []
+        ctx = resolve_ctx(command, command.name, args)
+        if ctx is None:
+            return []
 
-            for f in os.listdir(dir_name if dir_name != '' else '.'):
-                if f.startswith(file_name):
-                    if dir_name != '':
-                        f = os.path.join(dir_name, f)
+        choices = []
+        if incomplete and not incomplete[:1].isalnum():
+            for param in ctx.command.params:
+                if not isinstance(param, click.Option):
+                    continue
+                choices.extend(param.opts)
+                choices.extend(param.secondary_opts)
+        elif isinstance(ctx.command, click.MultiCommand):
+            choices.extend(ctx.command.list_commands(ctx))
 
-                    final_list.append(f)
-
-            if len(final_list) == 1 and os.path.isdir(final_list[0]):
-                final_list[0] = '%s/' % final_list[0]
-
-            return final_list
+        return [cmd for cmd in choices if cmd.startswith(incomplete)]
 
     complete_ = update_wrapper(complete_, command.callback)
     complete_.__name__ = 'help_%s' % command.name
@@ -127,9 +126,9 @@ class ClickShell(ClickCmd):
 
     def add_command(self, cmd, name):
         # Use the MethodType to add these as bound methods to our current instance
-        setattr(self, 'do_%s' % name, types.MethodType(get_invoke(cmd), self))
-        setattr(self, 'help_%s' % name, types.MethodType(get_help(cmd), self))
-        setattr(self, 'complete_%s' % name, types.MethodType(get_complete(cmd), self))
+        setattr(self, 'do_%s' % name, get_method_type(get_invoke(cmd), self, ClickShell))
+        setattr(self, 'help_%s' % name, get_method_type(get_help(cmd), self, ClickShell))
+        setattr(self, 'complete_%s' % name, get_method_type(get_complete(cmd), self, ClickShell))
 
 
 def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
