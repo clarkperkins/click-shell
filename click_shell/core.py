@@ -92,6 +92,7 @@ def get_complete(command):
     assert isinstance(command, click.Command)
 
     def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
+        # Pulled from click._bashcomplete.do_complete, and adapted to work in this situation.
         split = shlex.split(line)
         if line.endswith(' '):
             incomplete = ''
