@@ -67,7 +67,7 @@ class TestFactory(object):
             click.echo(time_str)
             return time_str
 
-        fun = get_invoke(test_command.make_context('test-app', []), test_command)
+        fun = get_invoke(test_command)
 
         assert callable(fun)
 
@@ -97,7 +97,7 @@ class TestFactory(object):
             click.echo('foo')
             return 'foo'
 
-        fun = get_invoke(main_level.make_context('test-app', []), test_group)
+        fun = get_invoke(test_group)
 
         assert callable(fun)
 

@@ -8,6 +8,8 @@ import logging
 import os
 import shlex
 import traceback
+import types
+from functools import update_wrapper
 
 import click
 
@@ -18,7 +20,7 @@ logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
 
 
-def get_invoke(root_ctx, command):
+def get_invoke(command):
     """
     Get the Cmd main method from the click command
     :param root_ctx: The root context object
@@ -34,7 +36,7 @@ def get_invoke(root_ctx, command):
             command.main(args=shlex.split(arg),
                          prog_name=command.name,
                          standalone_mode=False,
-                         parent=root_ctx)
+                         parent=self.ctx)
         except click.ClickException as e:
             # Show the error message
             e.show()
@@ -51,10 +53,13 @@ def get_invoke(root_ctx, command):
 
         # Always return False so the shell doesn't exit
         return False
+
+    invoke_ = update_wrapper(invoke_, command.callback)
+    invoke_.__name__ = 'do_%s' % command.name
     return invoke_
 
 
-def get_help(root_ctx, command):
+def get_help(command):
     """
     Get the Cmd help function from the click command
     :param root_ctx: The root context object
@@ -71,12 +76,15 @@ def get_help(root_ctx, command):
                 extra[key] = value
 
         # Print click's help message
-        with click.Context(command, info_name=command.name, parent=root_ctx, **extra) as ctx:
+        with click.Context(command, info_name=command.name, parent=self.ctx, **extra) as ctx:
             click.echo(ctx.get_help(), color=ctx.color)
+
+    help_ = update_wrapper(help_, command.callback)
+    help_.__name__ = 'help_%s' % command.name
     return help_
 
 
-def get_complete(root_ctx, command):
+def get_complete(command):
     """
     Get the Cmd complete function for the click command
     :param root_ctx: The root context object
@@ -90,7 +98,7 @@ def get_complete(root_ctx, command):
     if isinstance(command, click.MultiCommand):
         # we have a command with subcommands.  Autocomplete them
         def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
-            return [cmd for cmd in command.list_commands(root_ctx) if cmd.startswith(text)]
+            return [cmd for cmd in command.list_commands(self.ctx) if cmd.startswith(text)]
     else:
         # No subcommands, so complete with filenames
         def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
@@ -110,7 +118,18 @@ def get_complete(root_ctx, command):
 
             return final_list
 
+    complete_ = update_wrapper(complete_, command.callback)
+    complete_.__name__ = 'help_%s' % command.name
     return complete_
+
+
+class ClickShell(ClickCmd):
+
+    def add_command(self, cmd, name):
+        # Use the MethodType to add these as bound methods to our current instance
+        setattr(self, 'do_%s' % name, types.MethodType(get_invoke(cmd), self, ClickShell))
+        setattr(self, 'help_%s' % name, types.MethodType(get_help(cmd), self, ClickShell))
+        setattr(self, 'complete_%s' % name, types.MethodType(get_complete(cmd), self, ClickShell))
 
 
 def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
@@ -120,43 +139,56 @@ def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
     # Set this to None so that it doesn't get printed out in usage messages
     ctx.info_name = None
 
-    # Create our ClickShell class (just a pass for now in case we want to override things later)
-    class ClickShell(ClickCmd):
-        pass
+    # Create our shell object
+    shell = ClickShell(ctx=ctx, hist_file=hist_file)
 
     if prompt is not None:
-        ClickShell.prompt = prompt
+        shell.prompt = prompt
 
     if intro is not None:
-        ClickShell.intro = intro
+        shell.intro = intro
 
-    # set all the click commands
+    # Add all the commands
     for name in ctx.command.list_commands(ctx):
         command = ctx.command.get_command(ctx, name)
-        setattr(ClickShell, 'do_%s' % name, get_invoke(ctx, command))
-        setattr(ClickShell, 'help_%s' % name, get_help(ctx, command))
-        setattr(ClickShell, 'complete_%s' % name, get_complete(ctx, command))
+        shell.add_command(command, name)
 
-    return ClickShell(hist_file=hist_file)
+    return shell
 
 
 class Shell(click.Group):
 
     def __init__(self, prompt=None, intro=None, hist_file=None, **attrs):
-        self.prompt = prompt
-        self.intro = intro
-        self.hist_file = hist_file
         attrs['invoke_without_command'] = True
         super(Shell, self).__init__(**attrs)
 
+        # Make our shell
+        self.shell = ClickShell(hist_file=hist_file)
+        self.shell.prompt = prompt
+        self.shell.intro = intro
+
+    def add_command(self, cmd, name=None):
+        super(Shell, self).add_command(cmd, name)
+
+        # Grab the proper name
+        name = name or cmd.name
+
+        # Add the command to the shell
+        self.shell.add_command(cmd, name)
+
     def invoke(self, ctx):
-        # Grab the parent function first.  If there was no command passed, this
-        # shouldn't do anything bad, we just want to capture the retcode
+        # Call super() first.  This ensures that we call the method body of our instance first,
+        # in case it's something other than `pass`
         ret = super(Shell, self).invoke(ctx)
 
         if not ctx.protected_args and not ctx.invoked_subcommand:
+            # Set this to None so that it doesn't get printed out in usage messages
+            ctx.info_name = None
+
+            # Set the context on the shell
+            self.shell.ctx = ctx
+
             # Start up the shell
-            shell = make_click_shell(ctx, self.prompt, self.intro, self.hist_file)
-            return shell.cmdloop()
+            return self.shell.cmdloop()
 
         return ret

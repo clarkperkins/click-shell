@@ -31,9 +31,12 @@ class ClickCmd(Cmd, object):
     nohelp = "No help on %s"
     nocommand = "Command not found: %s"
 
-    def __init__(self, hist_file=None, *args, **kwargs):
+    def __init__(self, ctx=None, hist_file=None, *args, **kwargs):
         super(ClickCmd, self).__init__(*args, **kwargs)
         self.old_completer = None
+
+        # We need to save the context!!
+        self.ctx = ctx
 
         if hist_file is None:
             hist_file = os.path.join(os.path.expanduser('~'), '.click-history')
@@ -110,6 +113,10 @@ class ClickCmd(Cmd, object):
 
     def default(self, line):
         click.echo(self.nocommand % line, file=self.stdout)
+
+    def get_names(self):
+        # Do dir(self) instead of dir(self.__class__)
+        return dir(self)
 
     def do_help(self, arg):
         if not arg:
