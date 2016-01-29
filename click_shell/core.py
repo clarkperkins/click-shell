@@ -126,9 +126,9 @@ class ClickShell(ClickCmd):
 
     def add_command(self, cmd, name):
         # Use the MethodType to add these as bound methods to our current instance
-        setattr(self, 'do_%s' % name, get_method_type(get_invoke(cmd), self, ClickShell))
-        setattr(self, 'help_%s' % name, get_method_type(get_help(cmd), self, ClickShell))
-        setattr(self, 'complete_%s' % name, get_method_type(get_complete(cmd), self, ClickShell))
+        setattr(self, 'do_%s' % name, get_method_type(get_invoke(cmd), self))
+        setattr(self, 'help_%s' % name, get_method_type(get_help(cmd), self))
+        setattr(self, 'complete_%s' % name, get_method_type(get_complete(cmd), self))
 
 
 def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):

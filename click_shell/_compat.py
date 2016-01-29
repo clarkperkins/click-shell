@@ -30,8 +30,8 @@ except ImportError:
             self.lock = None
 
 
-def get_method_type(func, obj, obj_type):
+def get_method_type(func, obj):
     if PY2:
-        return types.MethodType(func, obj, obj_type)
+        return types.MethodType(func, obj, type(obj))
     else:
         return types.MethodType(func, obj)
