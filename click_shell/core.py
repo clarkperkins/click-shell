@@ -7,7 +7,6 @@ Core functionality for click-shell
 import logging
 import shlex
 import traceback
-import types
 from functools import update_wrapper
 
 import click
