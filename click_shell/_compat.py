@@ -4,7 +4,7 @@ click_shell._compat
 Compatibility things for python 2.6
 """
 
-# pylint: disable=unused-import
+# pylint: disable=unused-import, wrong-import-position
 
 import sys
 import types
