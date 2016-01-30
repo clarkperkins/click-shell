@@ -93,20 +93,14 @@ def get_complete(command):
 
     def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
         # Pulled from click._bashcomplete.do_complete, and adapted to work in this situation.
-        split = shlex.split(line)
-        if line.endswith(' '):
-            incomplete = ''
-            args = split
-        else:
-            incomplete = split[-1]
-            args = split[:-1]
+        args = shlex.split(line[:begidx])
 
         ctx = resolve_ctx(command, command.name, args)
         if ctx is None:
             return []
 
         choices = []
-        if incomplete and not incomplete[:1].isalnum():
+        if text and not text[:1].isalnum():
             for param in ctx.command.params:
                 if not isinstance(param, click.Option):
                     continue
@@ -115,7 +109,7 @@ def get_complete(command):
         elif isinstance(ctx.command, click.MultiCommand):
             choices.extend(ctx.command.list_commands(ctx))
 
-        return [cmd for cmd in choices if cmd.startswith(incomplete)]
+        return [cmd for cmd in choices if cmd.startswith(text)]
 
     complete_ = update_wrapper(complete_, command.callback)
     complete_.__name__ = 'help_%s' % command.name
