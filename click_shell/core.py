@@ -76,7 +76,6 @@ def get_help(command):
         with click.Context(command, info_name=command.name, parent=self.ctx, **extra) as ctx:
             click.echo(ctx.get_help(), color=ctx.color)
 
-    help_ = update_wrapper(help_, command.callback)
     help_.__name__ = 'help_%s' % command.name
     return help_
 
@@ -111,8 +110,7 @@ def get_complete(command):
 
         return [cmd for cmd in choices if cmd.startswith(text)]
 
-    complete_ = update_wrapper(complete_, command.callback)
-    complete_.__name__ = 'help_%s' % command.name
+    complete_.__name__ = 'complete_%s' % command.name
     return complete_
 
 
