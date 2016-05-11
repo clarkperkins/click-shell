@@ -38,9 +38,8 @@ class ClickCmd(Cmd, object):
         # We need to save the context!!
         self.ctx = ctx
 
-        if hist_file is None:
-            hist_file = os.path.join(os.path.expanduser('~'), '.click-history')
-
+        # Set the history file
+        hist_file = hist_file or os.path.join(os.path.expanduser('~'), '.click-history')
         self.hist_file = os.path.abspath(hist_file)
 
         # Make the parent directory
