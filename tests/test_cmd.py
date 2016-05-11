@@ -7,14 +7,12 @@ from click_shell._cmd import ClickCmd
 from click_shell._compat import PY2
 
 if PY2:
-    from cStringIO import StringIO
-    from StringIO import StringIO as RegStringIO
+    from StringIO import StringIO
 else:
     from io import StringIO
-    RegStringIO = StringIO
 
 
-class BadStringIO(RegStringIO, object):
+class BadStringIO(StringIO, object):
     def __init__(self, *args, **kwargs):
         super(BadStringIO, self).__init__(*args, **kwargs)
         self.first = True
@@ -55,13 +53,16 @@ def test_intro(monkeypatch):
     cmd = ClickCmd(hist_file='.history')
 
     cmd.cmdloop()
-    assert stdout.getvalue() == '(Cmd) \n'
-    stdout.reset()
+
+    expected_val = '(Cmd) \n'
+
+    assert stdout.getvalue() == expected_val
 
     for test_intro in ('foo', 'bar', 'blah\n version 2'):
         cmd.cmdloop(test_intro)
-        assert stdout.getvalue() == '{}\n(Cmd) \n'.format(test_intro)
-        stdout.reset()
+        expected_val += '{0}\n(Cmd) \n'.format(test_intro)
+
+        assert stdout.getvalue() == expected_val
 
     os.remove('.history')
 
