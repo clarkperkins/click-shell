@@ -32,5 +32,18 @@ script:
 # Only build artifacts on success
 after_success:
   - coveralls
+  - export CLICK_SHELL_VERSION=`python setup.py --version`
   - python setup.py sdist
   - python setup.py bdist_wheel
+
+deploy:
+  provider: releases
+  api_key:
+    secure: CPOVfiuKMNClH0OkygeHeUCFq8SjmT3hxX9z9HM31SnIXSKtmCNo3j5ytOVDPjpx7oeD5mmVKC+pMjBoIfSDvmqwjZShi/ndKxajcj2SeyyL1CPnfRUI+I3l3uqfScLon2e4Ydo/w7c/o5XHuETsZoXMlmmG8EjecrOzzvp9fSOpCFCm4yqjXTs3s+1S5XVREZHsoEgZ2WmjV4RMMAn/ZET7R7GJrmC/uR5XTeONSd+Ue9wva3A3LZZR3kV9ox6j8wI2CmasAa1w8C1uImMEfhhxZVqcKwWY5cRIhwBASlWiyKEbmXKLCKWy03mBHSQIM+jBl2qEJvr0MKXgbyYYxr2GRFp1n7fYczuiQjgtYDDEMuQvjONYG+4yJ5ea0ojgCPN43o0N4+B0Ym8HglbrNSZx3zkMpQs3ZmprCljMJsBeDFe8dm/mOd6FQ7hGFM3dGdRL6WtxgoymTYqm0Fm+9ShrnJUVnnbfb6pGjRB+DNlJyqfXitlJQteaaM7WMba83oMkzlFFF5ciX8n1zoaUpMb/jccrrHiiOff26xiP3nlAzXgN2GKRYhVSV74NMAFbb9MB/qdJNbnuyQcG6fvhgQJ/r5jR7bwPE4GoyWbY4QmLB7VZwtqz8HM0BTDvtYFvX3nea4Ewphz2vVVE6WgA9yw5DVMjtY1O74dFBijnGvc=
+  file:
+    - dist/click-shell-${CLICK_SHELL_VERSION}.tar.gz
+    - dist/click_shell-${CLICK_SHELL_VERSION}-py2.py3-none-any.whl
+  on:
+    tags: true
+    python: '2.7'
+    repo: clarkperkins/click-shell
