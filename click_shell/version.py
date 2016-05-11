@@ -42,7 +42,7 @@ def get_version(version):
     if version[3] == 'dev':
         # Override the sub part.  Add in a timestamp
         timestamp = get_git_changeset()
-        sub = 'dev%s' % (timestamp if timestamp else '')
+        sub = 'dev%s' % (timestamp if timestamp else version[4])
         return '%s.%s' % (major, sub)
     if version[3] == 'post':
         # We need a dot for post
