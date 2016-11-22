@@ -94,7 +94,7 @@ def get_complete(command):
         # Pulled from click._bashcomplete.do_complete, and adapted to work in this situation.
         args = shlex.split(line[:begidx])
 
-        ctx = resolve_ctx(command, command.name, args)
+        ctx = resolve_ctx(command, command.name, args[1:])
         if ctx is None:
             return []
 
