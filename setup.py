@@ -15,7 +15,6 @@ with open('README.rst') as f:
 
 requirements = [
     'click>=4.0',
-    'readline',
 ]
 
 testing_requirements = [
@@ -43,6 +42,8 @@ setup(
     dependency_links=[],
     extras_require={
         'testing': testing_requirements,
+        'readline': ['gnureadline'],
+        'windows': ['pyreadline'],
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
