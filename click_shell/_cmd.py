@@ -37,6 +37,7 @@ class ClickCmd(Cmd, object):
     def __init__(self, ctx=None, hist_file=None, *args, **kwargs):
         super(ClickCmd, self).__init__(*args, **kwargs)
         self.old_completer = None
+        self.old_delims = None
 
         # We need to save the context!!
         self.ctx = ctx
@@ -71,7 +72,9 @@ class ClickCmd(Cmd, object):
         self.preloop()
         if self.completekey and readline:
             self.old_completer = readline.get_completer()
+            self.old_delims = readline.get_completer_delims()
             readline.set_completer(self.complete)
+            readline.set_completer_delims(' \n\t')
             to_parse = self.completekey + ': complete'
             if 'libedit' in readline.__doc__:
                 # Special case for mac OSX
@@ -106,6 +109,7 @@ class ClickCmd(Cmd, object):
             self.postloop()
             if self.completekey and readline:
                 readline.set_completer(self.old_completer)
+                readline.set_completer_delims(self.old_delims)
 
     def get_prompt(self):
         return self.prompt
