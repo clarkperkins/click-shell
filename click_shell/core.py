@@ -10,10 +10,9 @@ import traceback
 from functools import update_wrapper
 
 import click
-from click._bashcomplete import resolve_ctx
 
 from ._cmd import ClickCmd
-from ._compat import NullHandler, get_method_type
+from ._compat import NullHandler, get_method_type, get_choices
 
 logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
@@ -91,24 +90,13 @@ def get_complete(command):
     assert isinstance(command, click.Command)
 
     def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
-        # Pulled from click._bashcomplete.do_complete, and adapted to work in this situation.
+        # Parse the args
         args = shlex.split(line[:begidx])
+        # Strip of the first item which is the name of the command
+        args = args[1:]
 
-        ctx = resolve_ctx(command, command.name, args[1:])
-        if ctx is None:
-            return []
-
-        choices = []
-        if text and not text[:1].isalnum():
-            for param in ctx.command.params:
-                if not isinstance(param, click.Option):
-                    continue
-                choices.extend(param.opts)
-                choices.extend(param.secondary_opts)
-        elif isinstance(ctx.command, click.MultiCommand):
-            choices.extend(ctx.command.list_commands(ctx))
-
-        return [cmd for cmd in choices if cmd.startswith(text)]
+        # Then pass them on to the get_choices method that click uses for completion
+        return list(get_choices(command, command.name, args, text))
 
     complete_.__name__ = 'complete_%s' % command.name
     return complete_
