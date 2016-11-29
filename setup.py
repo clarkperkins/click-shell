@@ -15,7 +15,6 @@ with open('README.rst') as f:
 
 requirements = [
     'click>=6.0',
-    'readline',
 ]
 
 testing_requirements = [
@@ -43,12 +42,17 @@ setup(
     dependency_links=[],
     extras_require={
         'testing': testing_requirements,
+        'readline': ['gnureadline'],
+        'windows': ['pyreadline'],
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
+        'Topic :: Software Development :: User Interfaces',
+        'Topic :: System :: Shells',
+        'Topic :: Utilities',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',

@@ -10,7 +10,10 @@ from cmd import Cmd
 try:
     import readline
 except ImportError:
-    readline = None
+    try:
+        import pyreadline as readline
+    except ImportError:
+        readline = None
 
 import click
 from click._compat import raw_input as get_input
@@ -58,6 +61,7 @@ class ClickCmd(Cmd, object):
     def postloop(self):
         # Write our history
         if readline:
+            readline.set_history_length(1000)
             try:
                 readline.write_history_file(self.hist_file)
             except IOError:
