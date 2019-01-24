@@ -29,7 +29,7 @@ Simply replace ``@click.group`` with ``@click_shell.shell`` on the root level co
     def my_app():
         pass
 
-    @my_app.command()
+    @my_app.command('the_command')
     def the_command():
         print 'the_command is running'
 
@@ -42,7 +42,8 @@ When run, you should expect an output like so:
 
     $ python my_app.py
     Starting my app...
-    my-app >
+    my-app > the_command
+    the_command is running
 
 
 .. note::
