@@ -34,13 +34,14 @@ class ClickCmd(Cmd, object):
     nohelp = "No help on %s"
     nocommand = "Command not found: %s"
 
-    def __init__(self, ctx=None, hist_file=None, *args, **kwargs):
+    def __init__(self, ctx=None, on_finished=None, hist_file=None, *args, **kwargs):
         super(ClickCmd, self).__init__(*args, **kwargs)
         self.old_completer = None
         self.old_delims = None
 
         # We need to save the context!!
         self.ctx = ctx
+        self.on_finished = on_finished
 
         # Set the history file
         hist_file = hist_file or os.path.join(os.path.expanduser('~'), '.click-history')
@@ -110,6 +111,9 @@ class ClickCmd(Cmd, object):
             if self.completekey and readline:
                 readline.set_completer(self.old_completer)
                 readline.set_completer_delims(self.old_delims)
+            # Finisher callback on the context
+            if self.on_finished:
+                self.on_finished(self.ctx)
 
     def get_prompt(self):
         return self.prompt

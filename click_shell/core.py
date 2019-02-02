@@ -137,12 +137,12 @@ def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
 
 class Shell(click.Group):
 
-    def __init__(self, prompt=None, intro=None, hist_file=None, **attrs):
+    def __init__(self, prompt=None, intro=None, hist_file=None, on_finished=None, **attrs):
         attrs['invoke_without_command'] = True
         super(Shell, self).__init__(**attrs)
 
         # Make our shell
-        self.shell = ClickShell(hist_file=hist_file)
+        self.shell = ClickShell(hist_file=hist_file, on_finished=on_finished)
         self.shell.prompt = prompt
         self.shell.intro = intro
 

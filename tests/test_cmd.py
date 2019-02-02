@@ -144,6 +144,24 @@ def test_exit(monkeypatch):
 
     os.remove('.history')
 
+def test_on_finished(monkeypatch):
+    stdin = StringIO('exit\n')
+    stdout = StringIO()
+
+    monkeypatch.setattr('sys.stdin', stdin)
+    monkeypatch.setattr('sys.stdout', stdout)
+    
+    def finisher(c):
+        print(c + '#finished')
+
+    cmd = ClickCmd(ctx='dummy-ctx', hist_file='.history', on_finished=finisher)
+
+    cmd.cmdloop()
+
+    assert stdout.getvalue() == ClickCmd.prompt + 'dummy-ctx#finished\n'
+
+    os.remove('.history')
+
 
 def test_help(monkeypatch):
     stdin = StringIO('help\n')
