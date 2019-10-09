@@ -76,7 +76,7 @@ class ClickCmd(Cmd, object):
             readline.set_completer(self.complete)
             readline.set_completer_delims(' \n\t')
             to_parse = self.completekey + ': complete'
-            if 'libedit' in readline.__doc__:
+            if readline.__doc__ and 'libedit' in readline.__doc__:
                 # Special case for mac OSX
                 to_parse = 'bind ^I rl_complete'
             readline.parse_and_bind(to_parse)
