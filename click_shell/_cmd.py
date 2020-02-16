@@ -7,16 +7,10 @@ This module overrides the builtin python cmd module
 import os
 from cmd import Cmd
 
-try:
-    import readline
-except ImportError:
-    try:
-        import pyreadline as readline
-    except ImportError:
-        readline = None
-
 import click
 from click._compat import raw_input as get_input
+
+from click_shell._compat import readline
 
 
 class ClickCmd(Cmd, object):
@@ -161,5 +155,5 @@ class ClickCmd(Cmd, object):
             click.echo(header, file=self.stdout)
             if self.ruler:
                 click.echo(str(self.ruler * len(header)), file=self.stdout)
-            self.columnize(cmds, maxcol-1)
+            self.columnize(cmds, maxcol - 1)
             click.echo(file=self.stdout)

@@ -73,4 +73,5 @@ def get_git_changeset():
     except ValueError:
         return None
 
+
 __version__ = get_version(VERSION)

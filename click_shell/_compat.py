@@ -12,22 +12,12 @@ import types
 PY2 = sys.version_info[0] == 2
 
 try:
-    from logging import NullHandler
+    import readline
 except ImportError:
-    import logging
-
-    class NullHandler(logging.Handler):
-        """
-        Backported from python 2.7
-        """
-        def handle(self, record):
-            pass
-
-        def emit(self, record):
-            pass
-
-        def createLock(self):
-            self.lock = None
+    try:
+        import pyreadline as readline
+    except ImportError:
+        readline = None
 
 
 def get_method_type(func, obj):
@@ -35,6 +25,7 @@ def get_method_type(func, obj):
         return types.MethodType(func, obj, type(obj))
     else:
         return types.MethodType(func, obj)
+
 
 try:
     from click._bashcomplete import get_choices

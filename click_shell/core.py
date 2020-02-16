@@ -8,11 +8,12 @@ import logging
 import shlex
 import traceback
 from functools import update_wrapper
+from logging import NullHandler
 
 import click
 
 from ._cmd import ClickCmd
-from ._compat import NullHandler, get_method_type, get_choices
+from ._compat import get_method_type, get_choices
 
 logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
