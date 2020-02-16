@@ -58,10 +58,10 @@ For more advanced usage, check out our docs at http://click-shell.readthedocs.or
 .. _click: http://click.pocoo.org/
 .. _cmd: https://docs.python.org/2/library/cmd.html
 
-.. |TravisCI| image:: https://travis-ci.org/clarkperkins/click-shell.svg?branch=master
-   :target: https://travis-ci.org/clarkperkins/click-shell
-   :alt: Build status
+.. |TravisCI| image:: https://travis-ci.com/clarkperkins/click-shell.svg?branch=master
+    :target: https://travis-ci.com/clarkperkins/click-shell
+    :alt: Build status
 
 .. |DocsStatus| image:: https://readthedocs.org/projects/click-shell/badge/?version=latest
-   :target: http://click-shell.readthedocs.org/en/latest/?badge=latest
-   :alt: Documentation Status
+    :target: https://click-shell.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
