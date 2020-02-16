@@ -3,6 +3,7 @@ dist: bionic
 
 python:
   - "2.7"
+  - "3.5"
   - "3.6"
   - "3.7"
   - "3.8"
@@ -24,29 +25,11 @@ addons:
     token:
       secure: "thxDw6g+PgwiWrCQ4pgStlU3wbT+Bn06kEHd3DMo1ck5pL+nj9EVwihJp6ToJ7LMV74HjB4Y0A5DREHzS1Uoq8VPWzUXyAAcIXzWxX/GFSDDTJeLqlIE4Z3JBhpMc0bmAkXh6/9vGCQHsNTIi5SpPaw8fs+Fd7jUOAnHsLzTwCU/1G45BHwz/aB7uxhA1XdB4rbGWKBtbxLppH9B7tH2lH1QXriB34BnzoOrcL8xbX231ss3cIINcDq+d13+WWUtR5NynT0g0lUYPXp52202O0Q4xSqpEQ/HCDfcjrBHsn1qguijjbv8pEaa4zpW87nw06VbFVfbY33j4v0AUr57b/K/QBcpI4rRnFk/PAcmkbIDi1luJ0UnhYnhdlFbltbe0qfEO2ZuBc3MGzBpf7lH2UbUfsvNx3AC0/GFaZbVsjluNh+1AZO5vcgGeMPVnS0751/OYhMByp0PpFUlkIQg2vgDAfaF4i/y1h1HF3p1Jvrx7U9BD45ep412LMEeFLGKZ2fqO70Z+xaiIGwyKJjhIMaLDxrSVe4+IshnK4iBltsl4P5vKv0a4REuQed/hhU2YaVX8csz+H4WGq+9+IuN2O3E4shmjzZYAhJj2oYcjv0MXSNpvRBZb0+jr6C1HDEjycPmMcWEj2ByjKYz8HWoDiFVd75ej6WTBUCNt9RyGAg="
 
-before_install:
-  - touch web.env
-  - pip install pipenv --upgrade
-
 install:
-  - pipenv install --deploy --dev
-
-before_script:
-  - mkdir reports
+  - ./install.sh
 
 script:
-  # Code linting
-  - pipenv run pycodestyle click_shell
-  - 'pipenv run pylint click_shell --reports=n --exit-zero --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > reports/pylint.txt'
-
-  # Type checking
-  - pipenv run mypy click_shell
-
-  # Unit tests
-  - pipenv run pytest --cov=click_shell --cov-report=xml
-
-  # Sonar
-  - sonar-scanner
+  - ./build.sh
 
 
 # Only build artifacts on success

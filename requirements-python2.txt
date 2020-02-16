@@ -1,0 +1,5 @@
+-e .
+pycodestyle
+pylint
+pytest
+pytest-cov
