@@ -1,38 +1,39 @@
 language: python
+dist: bionic
 
 python:
-  - "2.6"
   - "2.7"
-  - "3.3"
-  - "3.4"
   - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8"
 
-cache:
-  directories:
-    - $HOME/.cache/pip
+cache: pip
 
-# So that we get a docker container
-sudo: false
+git:
+  depth: false
 
-## Customize dependencies
+branches:
+  only:
+    - master
+    - 0
+    - 1
+
+addons:
+  sonarcloud:
+    organization: clarkperkins
+    token:
+      secure: "thxDw6g+PgwiWrCQ4pgStlU3wbT+Bn06kEHd3DMo1ck5pL+nj9EVwihJp6ToJ7LMV74HjB4Y0A5DREHzS1Uoq8VPWzUXyAAcIXzWxX/GFSDDTJeLqlIE4Z3JBhpMc0bmAkXh6/9vGCQHsNTIi5SpPaw8fs+Fd7jUOAnHsLzTwCU/1G45BHwz/aB7uxhA1XdB4rbGWKBtbxLppH9B7tH2lH1QXriB34BnzoOrcL8xbX231ss3cIINcDq+d13+WWUtR5NynT0g0lUYPXp52202O0Q4xSqpEQ/HCDfcjrBHsn1qguijjbv8pEaa4zpW87nw06VbFVfbY33j4v0AUr57b/K/QBcpI4rRnFk/PAcmkbIDi1luJ0UnhYnhdlFbltbe0qfEO2ZuBc3MGzBpf7lH2UbUfsvNx3AC0/GFaZbVsjluNh+1AZO5vcgGeMPVnS0751/OYhMByp0PpFUlkIQg2vgDAfaF4i/y1h1HF3p1Jvrx7U9BD45ep412LMEeFLGKZ2fqO70Z+xaiIGwyKJjhIMaLDxrSVe4+IshnK4iBltsl4P5vKv0a4REuQed/hhU2YaVX8csz+H4WGq+9+IuN2O3E4shmjzZYAhJj2oYcjv0MXSNpvRBZb0+jr6C1HDEjycPmMcWEj2ByjKYz8HWoDiFVd75ej6WTBUCNt9RyGAg="
+
 install:
-  - pip install -U pip
-  - pip install -U wheel
-  - pip install -U twine
-  - pip install -U -e .[testing]
+  - ./install.sh
 
-## Customize test commands - just a pep8 and pylint check for now
-before_script:
-  - pep8 click_shell && echo 'pep8 success' || echo 'pep8 failure'
-  - pylint click_shell && echo 'pylint success' || echo 'pylint failure'
-
-# Run our tests
 script:
-  - py.test --cov-report=html --cov-report=xml --cov=click_shell tests
+  - ./build.sh
+
 
 # Only build artifacts on success
 after_success:
-  - coveralls
   - python setup.py sdist
   - python setup.py bdist_wheel
 

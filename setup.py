@@ -17,14 +17,6 @@ requirements = [
     'click>=6.0',
 ]
 
-testing_requirements = [
-    'coveralls',
-    'pep8',
-    'pylint>=1.5,<1.6',
-    'pytest>=2.8,<2.9',
-    'pytest-cov>=2.2,<2.3',
-]
-
 
 setup(
     name='click-shell',
@@ -41,7 +33,6 @@ setup(
     install_requires=requirements,
     dependency_links=[],
     extras_require={
-        'testing': testing_requirements,
         'readline': ['gnureadline'],
         'windows': ['pyreadline'],
     },
@@ -55,11 +46,10 @@ setup(
         'Topic :: Utilities',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5'
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ]
 )
