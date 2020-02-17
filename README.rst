@@ -58,7 +58,7 @@ When run, you should expect an output like so:
     identically to how it did before.
 
 
-For more advanced usage, check out our docs at http://click-shell.readthedocs.org/
+For more advanced usage, check out our docs at https://click-shell.readthedocs.io/
 
 .. _click: http://click.pocoo.org/
 .. _cmd: https://docs.python.org/2/library/cmd.html
