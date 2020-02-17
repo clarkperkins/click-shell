@@ -6,31 +6,20 @@ This module overrides the builtin python cmd module
 
 import inspect
 import os
-import sys
 from cmd import Cmd
 
 import click
-from click._compat import _default_text_stdin, _default_text_stdout
+from click._compat import raw_input as get_input
 
 from click_shell._compat import readline
 
 
-def get_input(prompt, stdin, stdout):
-    sys.stderr.flush()
-    if prompt:
-        _stdout = stdout
-        if not _stdout:
-            _stdout = _default_text_stdout()
-
-        _stdout.write(prompt)
-        _stdout.flush()
-
-    _stdin = stdin
-    if not _stdin:
-        _stdin = _default_text_stdin()
-
-    ret = _stdin.readline().rstrip('\r\n')
-    return ret
+class EchoWrapper(object):
+    """
+    Simple wrapper around click's echo() method to make echo() look like an writable stream
+    """
+    def write(self, text, *args, **kwargs):
+        click.echo(text, nl=False)
 
 
 class ClickCmd(Cmd, object):
@@ -48,15 +37,13 @@ class ClickCmd(Cmd, object):
     nohelp = "No help on %s"
     nocommand = "Command not found: %s"
 
-    def __init__(self, ctx=None, on_finished=None, hist_file=None,
-                 stdin=None, stdout=None, *args, **kwargs):
-        super(ClickCmd, self).__init__(*args, **kwargs)
+    def __init__(self, ctx=None, on_finished=None, hist_file=None, *args, **kwargs):
+        # Never allow super() to default to sys.stdout for stdout.
+        # Instead pass along a wrapper that delegates to click.echo().
+        self._stdout = kwargs.get('stdout')
+        # kwargs['stdout'] = self._stdout or EchoWrapper()
 
-        # yes, this does overwrite the stdin/stdout that get set by super().
-        # But we want these to default to None, so that the get_input() method
-        # above will handle things correctly.
-        self.stdin = stdin
-        self.stdout = stdout
+        super(ClickCmd, self).__init__(*args, **kwargs)
 
         self.old_completer = None
         self.old_delims = None
@@ -111,22 +98,23 @@ class ClickCmd(Cmd, object):
             if intro is not None:
                 self.intro = intro
             if self.intro:
-                click.echo(self.intro, file=self.stdout)
+                click.echo(self.intro, file=self._stdout)
             stop = None
             while not stop:
                 if self.cmdqueue:
                     line = self.cmdqueue.pop(0)
                 else:
                     try:
-                        line = get_input(self.get_prompt(), self.stdin, self.stdout)
+                        click.echo(self.get_prompt(), nl=False, file=self._stdout)
+                        line = get_input('')
                     except EOFError:
                         # We just want to quit here instead of changing the arg to EOF
-                        click.echo(file=self.stdout)
+                        click.echo(file=self._stdout)
                         break
                     except KeyboardInterrupt:
                         # We don't want to exit the shell on a keyboard interrupt
-                        click.echo(file=self.stdout)
-                        click.echo('KeyboardInterrupt', file=self.stdout)
+                        click.echo(file=self._stdout)
+                        click.echo('KeyboardInterrupt', file=self._stdout)
                         continue
                 line = self.precmd(line)
                 stop = self.onecmd(line)
@@ -140,20 +128,22 @@ class ClickCmd(Cmd, object):
 
     def get_prompt(self):
         if callable(self.prompt):
-            sig = inspect.signature(self.prompt)
             kwargs = {}
-            if 'ctx' in sig.parameters:
-                kwargs['ctx'] = self.ctx
+            if hasattr(inspect, 'signature'):
+                sig = inspect.signature(self.prompt)
+                if 'ctx' in sig.parameters:
+                    kwargs['ctx'] = self.ctx
             return self.prompt(**kwargs)
         else:
             return self.prompt
 
     def emptyline(self):
+        click.echo(file=self._stdout)
         # we don't want to repeat the last command if nothing was typed
         return False
 
     def default(self, line):
-        click.echo(self.nocommand % line, file=self.stdout)
+        click.echo(self.nocommand % line, file=self._stdout)
 
     def get_names(self):
         # Do dir(self) instead of dir(self.__class__)
@@ -162,6 +152,7 @@ class ClickCmd(Cmd, object):
     def do_help(self, arg):
         if not arg:
             super(ClickCmd, self).do_help(arg)
+            return
 
         # Override to give better error message
         try:
@@ -171,16 +162,16 @@ class ClickCmd(Cmd, object):
                 do_fun = getattr(self, 'do_' + arg, None)
 
                 if do_fun is None:
-                    click.echo(self.nocommand % arg, file=self.stdout)
+                    click.echo(self.nocommand % arg, file=self._stdout)
                     return
 
                 doc = do_fun.__doc__
                 if doc:
-                    click.echo(doc, file=self.stdout)
+                    click.echo(doc, file=self._stdout)
                     return
             except AttributeError:
                 pass
-            click.echo(self.nohelp % arg, file=self.stdout)
+            click.echo(self.nohelp % arg, file=self._stdout)
             return
         func()
 
@@ -192,8 +183,8 @@ class ClickCmd(Cmd, object):
 
     def print_topics(self, header, cmds, cmdlen, maxcol):
         if cmds:
-            click.echo(header, file=self.stdout)
+            click.echo(header, file=self._stdout)
             if self.ruler:
-                click.echo(str(self.ruler * len(header)), file=self.stdout)
+                click.echo(str(self.ruler * len(header)), file=self._stdout)
             self.columnize(cmds, maxcol - 1)
-            click.echo(file=self.stdout)
+            click.echo(file=self._stdout)

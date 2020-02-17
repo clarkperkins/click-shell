@@ -1,6 +1,8 @@
-
 import os
+import sys
 from cmd import Cmd
+
+import click
 
 from click_shell._cmd import ClickCmd
 from click_shell._compat import PY2
@@ -43,161 +45,182 @@ def test_create():
     assert hasattr(cmd, 'do_exit')
 
 
-def test_intro():
-    stdin = StringIO('exit\n')
-    stdout = StringIO()
+def test_intro_default(cli_runner):
+    with cli_runner.isolation() as outstreams:
+        cmd = ClickCmd(hist_file='.history')
 
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+        cmd.cmdloop()
 
-    cmd.cmdloop()
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    expected_val = '(Cmd) '
+    assert output == '(Cmd) \n'
+    os.remove('.history')
 
-    assert stdout.getvalue() == expected_val
 
+def test_intro_custom(cli_runner):
     for test_in in ('foo', 'bar', 'blah\n version 2'):
-        stdin = StringIO('exit\n')
-        stdout = StringIO()
+        with cli_runner.isolation() as outstreams:
+            cmd = ClickCmd(hist_file='.history')
+            cmd.cmdloop(test_in)
 
-        cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
-        cmd.cmdloop(test_in)
-        expected_val = '{0}\n(Cmd) '.format(test_in)
+            output = outstreams[0].getvalue() \
+                .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-        assert stdout.getvalue() == expected_val
-
-    os.remove('.history')
-
-
-def test_prompt():
-    stdin = StringIO('exit\n')
-    stdout = StringIO()
-
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
-
-    cmd.prompt = 'foobar > '
-
-    cmd.cmdloop()
-
-    assert stdout.getvalue() == 'foobar > '
+        assert output == '{0}\n(Cmd) \n'.format(test_in)
 
     os.remove('.history')
 
 
-def test_bad_input():
-    stdin = StringIO('foobar\nexit\n')
-    stdout = StringIO()
+def test_prompt(cli_runner):
+    with cli_runner.isolation() as outstreams:
+        cmd = ClickCmd(hist_file='.history')
 
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+        cmd.prompt = 'foobar > '
 
-    cmd.cmdloop()
+        cmd.cmdloop()
 
-    assert stdout.getvalue() == '{0}{1}\n{0}'.format(ClickCmd.prompt,
-                                                     ClickCmd.nocommand % 'foobar')
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    os.remove('.history')
-
-
-def test_empty_input():
-    stdin = StringIO('\nexit\n')
-    stdout = StringIO()
-
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
-
-    cmd.cmdloop()
-
-    assert stdout.getvalue() == '{0}{0}'.format(ClickCmd.prompt)
+    assert output == 'foobar > \n'
 
     os.remove('.history')
 
 
-def test_quit():
-    stdin = StringIO('quit\n')
-    stdout = StringIO()
+def test_bad_input(cli_runner):
+    with cli_runner.isolation(input='foobar\n') as outstreams:
+        cmd = ClickCmd(hist_file='.history')
 
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+        cmd.cmdloop()
 
-    cmd.cmdloop()
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    assert stdout.getvalue() == ClickCmd.prompt
-
-    os.remove('.history')
-
-
-def test_exit():
-    stdin = StringIO('exit\n')
-    stdout = StringIO()
-
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
-
-    cmd.cmdloop()
-
-    assert stdout.getvalue() == ClickCmd.prompt
+    assert output == '{0}{1}\n{0}\n'.format(ClickCmd.prompt,
+                                            ClickCmd.nocommand % 'foobar')
 
     os.remove('.history')
 
 
-def test_on_finished():
-    stdin = StringIO('exit\n')
-    stdout = StringIO()
-    
-    def finisher(c):
-        stdout.write(c + '#finished\n')
+def test_empty_input(cli_runner):
+    with cli_runner.isolation(input='\n') as outstreams:
+        cmd = ClickCmd(hist_file='.history')
 
-    cmd = ClickCmd(ctx='dummy-ctx', hist_file='.history', on_finished=finisher, stdin=stdin, stdout=stdout)
+        cmd.cmdloop()
 
-    cmd.cmdloop()
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    assert stdout.getvalue() == ClickCmd.prompt + 'dummy-ctx#finished\n'
+    assert output == '{0}\n{0}\n'.format(ClickCmd.prompt)
 
     os.remove('.history')
 
 
-def test_help():
-    stdin = StringIO('help\nexit\n')
-    stdout = StringIO()
+def test_quit(cli_runner):
+    with cli_runner.isolation(input='quit\n') as outstreams:
+        cmd = ClickCmd(hist_file='.history')
 
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+        cmd.cmdloop()
 
-    cmd.cmdloop()
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    assert stdout.getvalue() == '{0}\nUndocumented commands:\n' \
-                                '======================\n' \
-                                'exit  help  quit\n' \
-                                '\n{0}'.format(ClickCmd.prompt)
+    assert output == ClickCmd.prompt
+
+    os.remove('.history')
+
+
+def test_exit(cli_runner):
+    with cli_runner.isolation(input='exit\n') as outstreams:
+        cmd = ClickCmd(hist_file='.history')
+
+        cmd.cmdloop()
+
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
+
+    assert output == ClickCmd.prompt
+
+    os.remove('.history')
+
+
+def test_on_finished(cli_runner):
+    with cli_runner.isolation() as outstreams:
+        def finisher(c):
+            click.echo(c + '#finished')
+
+        cmd = ClickCmd(ctx='dummy-ctx', hist_file='.history', on_finished=finisher)
+
+        cmd.cmdloop()
+
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
+
+    assert output == ClickCmd.prompt + '\ndummy-ctx#finished\n'
+
+    os.remove('.history')
+
+
+def test_help(cli_runner):
+    with cli_runner.isolation(input='help\n') as outstreams:
+        cmd = ClickCmd(hist_file='.history')
+
+        cmd.cmdloop()
+
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
+
+    assert output == '{0}\n' \
+                     'Undocumented commands:\n' \
+                     '======================\n' \
+                     'exit  help  quit\n' \
+                     '\n' \
+                     '{0}\n'.format(ClickCmd.prompt)
 
     os.remove('.history')
 
 
 def test_keyboard_interrupt():
-    stdin = BadStringIO('exit\n')
+    stdin = BadStringIO()
     stdout = StringIO()
 
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+    old_in = sys.stdin
+    try:
+        sys.stdin = stdin
 
-    cmd.cmdloop()
+        cmd = ClickCmd(hist_file='.history', stdout=stdout)
 
-    assert stdout.getvalue() == '{0}\nKeyboardInterrupt\n{0}'.format(ClickCmd.prompt)
+        cmd.cmdloop()
+    finally:
+        sys.stdin = old_in
+
+    assert stdout.getvalue() == '{0}\nKeyboardInterrupt\n{0}\n'.format(ClickCmd.prompt)
 
     os.remove('.history')
 
 
-def test_changable_prompt():
-    stdin = StringIO('\n\n\nexit\n')
-    stdout = StringIO()
+def test_changable_prompt(cli_runner):
+    with cli_runner.isolation(input='\n\n\n') as outstreams:
 
-    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+        cmd = ClickCmd(hist_file='.history')
 
-    num = 0
+        class Prompt(object):
 
-    def prompt_func():
-        nonlocal num
-        num += 1
-        return "prompt #{} > ".format(num)
+            def __init__(self):
+                self.num = 0
 
-    cmd.prompt = prompt_func
+            def __call__(self):
+                self.num += 1
+                return "prompt #{} > ".format(self.num)
 
-    cmd.cmdloop()
+        cmd.prompt = Prompt()
 
-    assert stdout.getvalue() == 'prompt #1 > prompt #2 > prompt #3 > prompt #4 > '
+        cmd.cmdloop()
+
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
+
+    assert output == 'prompt #1 > \nprompt #2 > \nprompt #3 > \nprompt #4 > \n'
 
     os.remove('.history')

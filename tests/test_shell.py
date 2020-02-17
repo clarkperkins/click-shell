@@ -1,31 +1,21 @@
-
 import click
 
 import click_shell
-from click_shell._compat import PY2
-
-if PY2:
-    from StringIO import StringIO
-else:
-    from io import StringIO
 
 
 # Test shell decorator
 def test_shell_decorator(cli_runner):
-
     @click_shell.shell(prompt='app# ')
     def app():
         pass
 
-    result = cli_runner.invoke(app, input='exit\n')
+    result = cli_runner.invoke(app)
 
-    # Verify the context key dictionary 'param' is printed
-    assert result.output == 'app# '
+    assert result.output == 'app# \n'
 
 
 # Test with one command
 def test_command_decorator(cli_runner):
-
     @click_shell.shell(prompt='app$ ')
     def app_one_command():
         pass
@@ -34,15 +24,14 @@ def test_command_decorator(cli_runner):
     def printer():
         click.echo('printed')
 
-    result = cli_runner.invoke(app_one_command, input='printer\nexit\n')
+    result = cli_runner.invoke(app_one_command, input='printer\n')
 
     # Verify the context key dictionary 'param' is printed
-    assert result.output == 'app$ printed\napp$ '
+    assert result.output == 'app$ printed\napp$ \n'
 
 
 # Test with finisher
 def test_on_finished(cli_runner):
-
     def finisher(ctx):
         click.echo(ctx.obj['param'])
 
@@ -50,7 +39,7 @@ def test_on_finished(cli_runner):
     def app_with_finisher():
         pass
 
-    result = cli_runner.invoke(app_with_finisher, input='exit\n', obj={'param': 'value'})
+    result = cli_runner.invoke(app_with_finisher, obj={'param': 'value'})
 
     # Verify the context key dictionary 'param' is printed
-    assert result.output == 'app> value\n'
+    assert result.output == 'app> \nvalue\n'

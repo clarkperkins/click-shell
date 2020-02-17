@@ -145,7 +145,8 @@ class Shell(click.Group):
 
         # Make our shell
         self.shell = ClickShell(hist_file=hist_file, on_finished=on_finished)
-        self.shell.prompt = prompt
+        if prompt:
+            self.shell.prompt = prompt
         self.shell.intro = intro
 
     def add_command(self, cmd, name=None):
