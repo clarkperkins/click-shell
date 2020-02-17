@@ -41,7 +41,7 @@ When run with the above arguments, you should expect an output like so:
     my-app >
 
 
-``@shell`` takes 3 arguments:
+``@shell`` takes 4 arguments:
 
 - ``prompt`` - this will get printed as the beginning of each line in the shell
   Defaults to ``'(Cmd) '``
@@ -49,6 +49,8 @@ When run with the above arguments, you should expect an output like so:
   Defaults to ``None``, meaning nothing gets printed
 - ``hist_file`` - this is the location of the history file used by the shell.
   Defaults to ``'~/.click-history'``
+- ``on_finished`` - a callable that will be called when the shell exits.
+  You can use it to clean up any resources that may need cleaning up.
 
 ``@shell`` also takes arbitrary keyword arguments, and they are passed on directly to the
 constructor for the `click_shell.Shell`` class.
