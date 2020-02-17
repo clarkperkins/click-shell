@@ -27,5 +27,13 @@ Features
    troubleshooting
 
 
-.. _click: http://click.pocoo.org/
+Changelog
+---------
+
+The changelog is located in GitHub:
+
+https://github.com/clarkperkins/click-shell/blob/master/CHANGELOG.rst
+
+
+.. _click: https://click.palletsprojects.com/
 .. _cmd: https://docs.python.org/3/library/cmd.html
