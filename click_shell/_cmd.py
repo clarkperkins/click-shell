@@ -4,6 +4,7 @@ click_shell._cmd
 This module overrides the builtin python cmd module
 """
 
+import inspect
 import os
 import sys
 from cmd import Cmd
@@ -138,7 +139,14 @@ class ClickCmd(Cmd, object):
                 readline.set_completer_delims(self.old_delims)
 
     def get_prompt(self):
-        return self.prompt
+        if callable(self.prompt):
+            sig = inspect.signature(self.prompt)
+            kwargs = {}
+            if 'ctx' in sig.parameters:
+                kwargs['ctx'] = self.ctx
+            return self.prompt(**kwargs)
+        else:
+            return self.prompt
 
     def emptyline(self):
         # we don't want to repeat the last command if nothing was typed

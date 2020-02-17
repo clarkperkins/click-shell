@@ -43,7 +43,9 @@ When run with the above arguments, you should expect an output like so:
 
 ``@shell`` takes 3 arguments:
 
-- ``prompt`` - this will get printed as the beginning of each line in the shell
+- ``prompt`` - this will get printed as the beginning of each line in the shell.
+  This can take a callable that will be called each time a prompt is printed.
+  If the callable takes an argument named ``ctx``, the click context will be passed in as that argument.
   Defaults to ``'(Cmd) '``
 - ``intro`` - this will get printed once when the shell first starts
   Defaults to ``None``, meaning nothing gets printed
