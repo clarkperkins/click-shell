@@ -30,10 +30,13 @@ Simply replace ``@click.group`` with ``@click_shell.shell`` on the root level co
         pass
 
     @my_app.command()
-    def the_command():
-        print 'the_command is running'
+    def testcommand():
+        print('testcommand is running')
 
-    ...
+    # more commands
+
+    if __name__ == '__main__':
+        my_app()
 
 
 When run, you should expect an output like so:
@@ -42,6 +45,8 @@ When run, you should expect an output like so:
 
     $ python my_app.py
     Starting my app...
+    my-app > testcommand
+    testcommand is running
     my-app >
 
 
