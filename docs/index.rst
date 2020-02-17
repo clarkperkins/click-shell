@@ -24,15 +24,8 @@ Features
 
    install
    usage
+   changelog
    troubleshooting
-
-
-Changelog
----------
-
-The changelog is located in GitHub:
-
-https://github.com/clarkperkins/click-shell/blob/master/CHANGELOG.rst
 
 
 .. _click: https://click.palletsprojects.com/
