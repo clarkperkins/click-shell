@@ -1,7 +1,7 @@
 Version 2.0
 -----------
 
-Unreleased
+Released 2020-02-17
 
 - Drop support for Python 2.6, 3.3, and 3.4
 - Add support for Python 3.6, 3.7, and 3.8
@@ -18,6 +18,8 @@ Unreleased
 
 Version 1.0
 -----------
+
+Released 2016-11-28
 
 - Support ``pyreadline`` for Windows.
   `#5 <https://github.com/clarkperkins/click-shell/pull/5>`_
