@@ -1,29 +1,40 @@
+import io
+import os
 
 from setuptools import setup, find_packages
 
-# Set version
-__version__ = '0.0.0'  # Explicit default
-with open('click_shell/version.py') as f:
-    exec(f.read())
+
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with io.open(os.path.join(here, rel_path), 'r') as fp:
+        return fp.read()
 
 
-SHORT_DESCRIPTION = 'An extension to click that easily turns your click app into a shell utility'
+def get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            # __version__ = "0.9"
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
+
+
+SHORT_DESCRIPTION = "An extension to click that easily turns your click app into a shell utility"
 
 # Use the README.md as the long description
-with open('README.rst') as f:
-    LONG_DESCRIPTION = f.read()
+LONG_DESCRIPTION = read('README.rst')
 
 requirements = [
     'click>=6.0',
 ]
 
-
 setup(
     name='click-shell',
-    version=__version__,
-    url='https://github.com/clarkperkins/click-shell',
-    author='Clark Perkins',
-    author_email='r.clark.perkins@gmail.com',
+    version=get_version('click_shell/__init__.py'),
+    url="https://github.com/clarkperkins/click-shell",
+    author="Clark Perkins",
+    author_email="r.clark.perkins@gmail.com",
     description=SHORT_DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     license='BSD',

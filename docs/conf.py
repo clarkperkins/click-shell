@@ -12,13 +12,12 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys
 import os
-import shlex
+import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from click_shell.version import __version__, VERSION
+from click_shell import __version__
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -68,7 +67,7 @@ author = u'Clark Perkins'
 # built documents.
 #
 # The short X.Y version.
-version = str(VERSION[0])
+version = __version__.split('.')[0]
 # The full version, including alpha/beta/rc tags.
 release = __version__
 
