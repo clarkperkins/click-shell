@@ -1,18 +1,14 @@
 language: python
+os: linux
+dist: bionic
 
 python:
-  - "2.6"
   - "2.7"
-  - "3.3"
-  - "3.4"
   - "3.5"
 
 cache:
   directories:
     - $HOME/.cache/pip
-
-# So that we get a docker container
-sudo: false
 
 ## Customize dependencies
 install:
