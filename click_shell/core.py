@@ -97,7 +97,8 @@ def get_complete(command):
         args = args[1:]
 
         # Then pass them on to the get_choices method that click uses for completion
-        return [choice[0] if type(choice) is tuple else choice for choice in get_choices(command, command.name, args, text)]
+        return [choice[0] if isinstance(choice, tuple) else choice
+                for choice in get_choices(command, command.name, args, text)]
 
     complete_.__name__ = 'complete_%s' % command.name
     return complete_
