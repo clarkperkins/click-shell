@@ -153,7 +153,7 @@ class ClickCmd(Cmd, object):
 
     def do_help(self, arg):
         if not arg:
-            return super(ClickCmd, self).do_help(arg)
+            super(ClickCmd, self).do_help(arg)
 
         # Override to give better error message
         try:
