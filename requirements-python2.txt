@@ -2,4 +2,5 @@
 pycodestyle
 pylint
 pytest
+pytest-click
 pytest-cov

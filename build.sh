@@ -16,7 +16,7 @@ if [ "$TRAVIS_PYTHON_VERSION" != "2.7" ]; then
 fi
 
 # Unit tests
-pytest --cov=click_shell --cov-report=xml
+pytest -vv --cov=click_shell --cov-report=xml
 
 if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ]; then
   echo "Python 3.5 detected, running sonar-scanner"
