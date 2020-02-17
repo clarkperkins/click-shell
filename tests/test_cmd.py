@@ -1,6 +1,5 @@
 
 import os
-
 from cmd import Cmd
 
 from click_shell._cmd import ClickCmd
@@ -44,84 +43,78 @@ def test_create():
     assert hasattr(cmd, 'do_exit')
 
 
-def test_intro(monkeypatch):
-    stdin = StringIO()
+def test_intro():
+    stdin = StringIO('exit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
-    expected_val = '(Cmd) \n'
+    expected_val = '(Cmd) '
 
     assert stdout.getvalue() == expected_val
 
-    for test_intro in ('foo', 'bar', 'blah\n version 2'):
-        cmd.cmdloop(test_intro)
-        expected_val += '{0}\n(Cmd) \n'.format(test_intro)
+    for test_in in ('foo', 'bar', 'blah\n version 2'):
+        stdin = StringIO('exit\n')
+        stdout = StringIO()
+
+        cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+        cmd.cmdloop(test_in)
+        expected_val = '{0}\n(Cmd) '.format(test_in)
 
         assert stdout.getvalue() == expected_val
 
     os.remove('.history')
 
 
-def test_prompt(monkeypatch):
-    stdin = StringIO()
+def test_prompt():
+    stdin = StringIO('exit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.prompt = 'foobar > '
 
     cmd.cmdloop()
 
-    assert stdout.getvalue() == 'foobar > \n'
+    assert stdout.getvalue() == 'foobar > '
 
     os.remove('.history')
 
 
-def test_bad_input(monkeypatch):
-    stdin = StringIO('foobar\n')
+def test_bad_input():
+    stdin = StringIO('foobar\nexit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
-    assert stdout.getvalue() == '{0}{1}\n{0}\n'.format(ClickCmd.prompt,
-                                                       ClickCmd.nocommand % 'foobar')
+    assert stdout.getvalue() == '{0}{1}\n{0}'.format(ClickCmd.prompt,
+                                                     ClickCmd.nocommand % 'foobar')
 
     os.remove('.history')
 
 
-def test_empty_input(monkeypatch):
-    stdin = StringIO('\n')
+def test_empty_input():
+    stdin = StringIO('\nexit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
-    assert stdout.getvalue() == '{0}{0}\n'.format(ClickCmd.prompt)
+    assert stdout.getvalue() == '{0}{0}'.format(ClickCmd.prompt)
 
     os.remove('.history')
 
 
-def test_quit(monkeypatch):
+def test_quit():
     stdin = StringIO('quit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
@@ -130,13 +123,11 @@ def test_quit(monkeypatch):
     os.remove('.history')
 
 
-def test_exit(monkeypatch):
+def test_exit():
     stdin = StringIO('exit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
@@ -144,17 +135,15 @@ def test_exit(monkeypatch):
 
     os.remove('.history')
 
-def test_on_finished(monkeypatch):
+
+def test_on_finished():
     stdin = StringIO('exit\n')
     stdout = StringIO()
-
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
     
     def finisher(c):
-        print(c + '#finished')
+        stdout.write(c + '#finished\n')
 
-    cmd = ClickCmd(ctx='dummy-ctx', hist_file='.history', on_finished=finisher)
+    cmd = ClickCmd(ctx='dummy-ctx', hist_file='.history', on_finished=finisher, stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
@@ -163,34 +152,30 @@ def test_on_finished(monkeypatch):
     os.remove('.history')
 
 
-def test_help(monkeypatch):
-    stdin = StringIO('help\n')
+def test_help():
+    stdin = StringIO('help\nexit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
     assert stdout.getvalue() == '{0}\nUndocumented commands:\n' \
                                 '======================\n' \
                                 'exit  help  quit\n' \
-                                '\n{0}\n'.format(ClickCmd.prompt)
+                                '\n{0}'.format(ClickCmd.prompt)
 
     os.remove('.history')
 
 
-def test_keyboard_interrupt(monkeypatch):
-    stdin = BadStringIO()
+def test_keyboard_interrupt():
+    stdin = BadStringIO('exit\n')
     stdout = StringIO()
 
-    monkeypatch.setattr('sys.stdin', stdin)
-    monkeypatch.setattr('sys.stdout', stdout)
-    cmd = ClickCmd(hist_file='.history')
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
 
     cmd.cmdloop()
 
-    assert stdout.getvalue() == '{0}\nKeyboardInterrupt\n{0}\n'.format(ClickCmd.prompt)
+    assert stdout.getvalue() == '{0}\nKeyboardInterrupt\n{0}'.format(ClickCmd.prompt)
 
     os.remove('.history')

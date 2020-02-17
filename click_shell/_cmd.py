@@ -5,12 +5,31 @@ This module overrides the builtin python cmd module
 """
 
 import os
+import sys
 from cmd import Cmd
 
 import click
-from click._compat import raw_input as get_input
+from click._compat import _default_text_stdin, _default_text_stdout
 
 from click_shell._compat import readline
+
+
+def get_input(prompt, stdin, stdout):
+    sys.stderr.flush()
+    if prompt:
+        _stdout = stdout
+        if not _stdout:
+            _stdout = _default_text_stdout()
+
+        _stdout.write(prompt)
+        _stdout.flush()
+
+    _stdin = stdin
+    if not _stdin:
+        _stdin = _default_text_stdin()
+
+    ret = _stdin.readline().rstrip('\r\n')
+    return ret
 
 
 class ClickCmd(Cmd, object):
@@ -28,8 +47,16 @@ class ClickCmd(Cmd, object):
     nohelp = "No help on %s"
     nocommand = "Command not found: %s"
 
-    def __init__(self, ctx=None, on_finished=None, hist_file=None, *args, **kwargs):
+    def __init__(self, ctx=None, on_finished=None, hist_file=None,
+                 stdin=None, stdout=None, *args, **kwargs):
         super(ClickCmd, self).__init__(*args, **kwargs)
+
+        # yes, this does overwrite the stdin/stdout that get set by super().
+        # But we want these to default to None, so that the get_input() method
+        # above will handle things correctly.
+        self.stdin = stdin
+        self.stdout = stdout
+
         self.old_completer = None
         self.old_delims = None
 
@@ -62,6 +89,10 @@ class ClickCmd(Cmd, object):
             except IOError:
                 pass
 
+        # Finisher callback on the context
+        if self.on_finished:
+            self.on_finished(self.ctx)
+
     # We need to override this to fix readline
     def cmdloop(self, intro=None):  # pylint: disable=too-many-branches
         self.preloop()
@@ -86,7 +117,7 @@ class ClickCmd(Cmd, object):
                     line = self.cmdqueue.pop(0)
                 else:
                     try:
-                        line = get_input(self.get_prompt())
+                        line = get_input(self.get_prompt(), self.stdin, self.stdout)
                     except EOFError:
                         # We just want to quit here instead of changing the arg to EOF
                         click.echo(file=self.stdout)
@@ -105,9 +136,6 @@ class ClickCmd(Cmd, object):
             if self.completekey and readline:
                 readline.set_completer(self.old_completer)
                 readline.set_completer_delims(self.old_delims)
-            # Finisher callback on the context
-            if self.on_finished:
-                self.on_finished(self.ctx)
 
     def get_prompt(self):
         return self.prompt
