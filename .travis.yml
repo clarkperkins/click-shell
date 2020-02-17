@@ -1,4 +1,5 @@
 language: python
+os: linux
 dist: bionic
 
 python:
@@ -31,32 +32,14 @@ install:
 script:
   - ./build.sh
 
-
-# Only build artifacts on success
-after_success:
-  - python setup.py sdist
-  - python setup.py bdist_wheel
-
 deploy:
-  - provider: releases
-    api_key:
-      secure: CPOVfiuKMNClH0OkygeHeUCFq8SjmT3hxX9z9HM31SnIXSKtmCNo3j5ytOVDPjpx7oeD5mmVKC+pMjBoIfSDvmqwjZShi/ndKxajcj2SeyyL1CPnfRUI+I3l3uqfScLon2e4Ydo/w7c/o5XHuETsZoXMlmmG8EjecrOzzvp9fSOpCFCm4yqjXTs3s+1S5XVREZHsoEgZ2WmjV4RMMAn/ZET7R7GJrmC/uR5XTeONSd+Ue9wva3A3LZZR3kV9ox6j8wI2CmasAa1w8C1uImMEfhhxZVqcKwWY5cRIhwBASlWiyKEbmXKLCKWy03mBHSQIM+jBl2qEJvr0MKXgbyYYxr2GRFp1n7fYczuiQjgtYDDEMuQvjONYG+4yJ5ea0ojgCPN43o0N4+B0Ym8HglbrNSZx3zkMpQs3ZmprCljMJsBeDFe8dm/mOd6FQ7hGFM3dGdRL6WtxgoymTYqm0Fm+9ShrnJUVnnbfb6pGjRB+DNlJyqfXitlJQteaaM7WMba83oMkzlFFF5ciX8n1zoaUpMb/jccrrHiiOff26xiP3nlAzXgN2GKRYhVSV74NMAFbb9MB/qdJNbnuyQcG6fvhgQJ/r5jR7bwPE4GoyWbY4QmLB7VZwtqz8HM0BTDvtYFvX3nea4Ewphz2vVVE6WgA9yw5DVMjtY1O74dFBijnGvc=
-    file:
-      - dist/click-shell-${TRAVIS_TAG}.tar.gz
-      - dist/click_shell-${TRAVIS_TAG}-py2.py3-none-any.whl
-    on:
-      tags: true
-      python: '2.7'
-      repo: clarkperkins/click-shell
-
-  # Upload to pypi.  Do this instead of the pypi provider so that we
-  # ensure the exact same artifact is uploaded to github and pypi.
-  # The pypi provider will re-build the 2 artifacts, which is not ideal.
-  # This requires setting TWINE_USERNAME and TWINE_PASSWORD in travis.
-  - provider: script
-    script: twine upload dist/click-shell-${TRAVIS_TAG}.tar.gz dist/click_shell-${TRAVIS_TAG}-py2.py3-none-any.whl
-    skip_cleanup: true
+  - provider: pypi
+    username: clarkperkins
+    password:
+      secure: "exS7j0Z69e/9rpeQmNd0hQP3zN3OXUB3SiLSsjI5m1s+isH43IpgOmGcPWdRh53/1wKPqFrkeVkyT1qDkCh4Ae1RkQTQKyLxF1D/lkhyUU1/gTrElimgOM25OZuUuCpm+92zgbeF80HYdiOiib4X5aN1zNw9SXP2c8RinhA6Ml0n6CJXRM8j7KdcTrhrHJ3oIpBELD2uGyGPO3K02ThOv6BvyWRL2BzgmBU79SG/Ss8aLgBpdrBToJLhT47ZF4G4pfv0UlHESyRhIdxp/D0Rx0K9DvRJaL/xIcXn6g8Lg21YDn1dofkhdBSq8rSRBRKURHkggU1wO04c2kmiqPpYV3krGlHGGtjKSpcd7A7EVbCCg6WxLuQNgzRA5C1MUD/uOgPqPTIFjOJeVpBkSoL9VUvXS/rIRUet6kBcdOU9hpRYZKeSxRbb70QN5DsYS8F4NQPGxpVZb3wrBbIn0R1lJvYMfsaD0pkyyW+2fZOZjJKMcl9m7HSMppNzWDaZPU9O7iUMuG5dFcgttA44szkzUgrmUshDvbMb2acvwcZJEMJDhgfRJrm/2NlESlvmortnp+RJ2/Se52wH6urRK3CvFp9zOZzQWES3bfPC1hSVkcqarbn9xXujWBwDG+5l9m6+gAWNh4eF5+1IjWWG3NO8kLR/7ikwQMbwtUKlJdfFzbE="
+    distributions: sdist bdist_wheel
+    edge: true
     on:
       tags: true
       repo: clarkperkins/click-shell
-      python: "2.7"
+      python: '3.5'
