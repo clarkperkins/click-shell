@@ -179,3 +179,25 @@ def test_keyboard_interrupt():
     assert stdout.getvalue() == '{0}\nKeyboardInterrupt\n{0}'.format(ClickCmd.prompt)
 
     os.remove('.history')
+
+
+def test_changable_prompt():
+    stdin = StringIO('\n\n\nexit\n')
+    stdout = StringIO()
+
+    cmd = ClickCmd(hist_file='.history', stdin=stdin, stdout=stdout)
+
+    num = 0
+
+    def prompt_func():
+        nonlocal num
+        num += 1
+        return "prompt #{} > ".format(num)
+
+    cmd.prompt = prompt_func
+
+    cmd.cmdloop()
+
+    assert stdout.getvalue() == 'prompt #1 > prompt #2 > prompt #3 > prompt #4 > '
+
+    os.remove('.history')
