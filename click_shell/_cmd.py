@@ -14,14 +14,6 @@ from click._compat import raw_input as get_input
 from click_shell._compat import readline
 
 
-class EchoWrapper(object):
-    """
-    Simple wrapper around click's echo() method to make echo() look like an writable stream
-    """
-    def write(self, text, *args, **kwargs):
-        click.echo(text, nl=False)
-
-
 class ClickCmd(Cmd, object):
     """
     A simple wrapper around the builtin python cmd module that:
@@ -41,7 +33,6 @@ class ClickCmd(Cmd, object):
         # Never allow super() to default to sys.stdout for stdout.
         # Instead pass along a wrapper that delegates to click.echo().
         self._stdout = kwargs.get('stdout')
-        # kwargs['stdout'] = self._stdout or EchoWrapper()
 
         super(ClickCmd, self).__init__(*args, **kwargs)
 
@@ -105,8 +96,7 @@ class ClickCmd(Cmd, object):
                     line = self.cmdqueue.pop(0)
                 else:
                     try:
-                        click.echo(self.get_prompt(), nl=False, file=self._stdout)
-                        line = get_input('')
+                        line = get_input(self.get_prompt())
                     except EOFError:
                         # We just want to quit here instead of changing the arg to EOF
                         click.echo(file=self._stdout)
@@ -138,7 +128,6 @@ class ClickCmd(Cmd, object):
             return self.prompt
 
     def emptyline(self):
-        click.echo(file=self._stdout)
         # we don't want to repeat the last command if nothing was typed
         return False
 
