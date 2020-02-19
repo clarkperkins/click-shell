@@ -20,7 +20,7 @@ fi
 # Unit tests
 pytest -vv --cov=click_shell --cov-report=xml
 
-if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ]; then
+if [ "$TRAVIS_PYTHON_VERSION" == "3.5" ] && [ "$TRAVIS_TAG" == "" ]; then
   echo "Python 3.5 detected, running sonar-scanner"
   sonar-scanner -Dsonar.projectVersion=$(python setup.py --version)
 fi
