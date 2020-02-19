@@ -112,7 +112,7 @@ def test_empty_input(cli_runner):
         output = outstreams[0].getvalue() \
             .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    assert output == '{0}\n{0}\n'.format(ClickCmd.prompt)
+    assert output == '{0}{0}\n'.format(ClickCmd.prompt)
 
     os.remove('.history')
 
@@ -186,14 +186,17 @@ def test_keyboard_interrupt():
     stdout = StringIO()
 
     old_in = sys.stdin
+    old_out = sys.stdout
     try:
         sys.stdin = stdin
+        sys.stdout = stdout
 
-        cmd = ClickCmd(hist_file='.history', stdout=stdout)
+        cmd = ClickCmd(hist_file='.history')
 
         cmd.cmdloop()
     finally:
         sys.stdin = old_in
+        sys.stdout = old_out
 
     assert stdout.getvalue() == '{0}\nKeyboardInterrupt\n{0}\n'.format(ClickCmd.prompt)
 
@@ -221,6 +224,6 @@ def test_changable_prompt(cli_runner):
         output = outstreams[0].getvalue() \
             .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    assert output == 'prompt #1 > \nprompt #2 > \nprompt #3 > \nprompt #4 > \n'
+    assert output == 'prompt #1 > prompt #2 > prompt #3 > prompt #4 > \n'
 
     os.remove('.history')
