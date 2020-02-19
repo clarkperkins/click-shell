@@ -1,7 +1,7 @@
 click-shell
 ===========
 
-|TravisCI| |DocsStatus|
+|TravisCI| |Sonar| |DocsStatus|
 
 click-shell is an extension to `click`_ that easily turns your click app into a shell utility.
 It is built on top of the built in python `cmd`_ module, with modifications to make it work with click.
@@ -22,6 +22,7 @@ Simply replace ``@click.group`` with ``@click_shell.shell`` on the root level co
 
 .. code-block:: python
 
+    import click
     from click_shell import shell
 
     # @click.group()  # no longer
@@ -31,7 +32,7 @@ Simply replace ``@click.group`` with ``@click_shell.shell`` on the root level co
 
     @my_app.command()
     def testcommand():
-        print('testcommand is running')
+        click.echo("testcommand is running")
 
     # more commands
 
@@ -70,3 +71,7 @@ For more advanced usage, check out our docs at https://click-shell.readthedocs.i
 .. |DocsStatus| image:: https://readthedocs.org/projects/click-shell/badge/?version=latest
     :target: https://click-shell.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
+
+.. |Sonar| image:: https://sonarcloud.io/api/project_badges/measure?project=clarkperkins_click-shell&metric=alert_status
+    :target: https://sonarcloud.io/dashboard?id=clarkperkins_click-shell
+    :alt: Quality Gate Status
