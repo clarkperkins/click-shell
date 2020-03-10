@@ -1,0 +1,8 @@
+include LICENSE
+include README.rst
+include CHANGELOG.rst
+include install.sh
+include requirements-python2.txt
+include Pipfile
+recursive-include docs *.rst
+recursive-include tests *.py
