@@ -9,9 +9,8 @@ import os
 from cmd import Cmd
 
 import click
-from click._compat import raw_input as get_input
 
-from click_shell._compat import readline
+from click_shell._compat import readline, get_input
 
 
 class ClickCmd(Cmd, object):
