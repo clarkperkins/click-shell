@@ -19,6 +19,14 @@ except ImportError:
     except ImportError:
         readline = None
 
+try:
+    from click._compat import raw_input as get_input
+except ImportError:
+    # If click._compat does not provide raw_input, it means we're
+    # dealing with click >= 8, which means we're under Python 3,
+    # so we can just use the standard input function.
+    get_input = input
+
 
 def get_method_type(func, obj):
     if PY2:
@@ -33,7 +41,13 @@ try:
 except ImportError:
 
     import click
-    from click._bashcomplete import resolve_ctx
+    try:
+        from click._bashcomplete import resolve_ctx
+    except ImportError:
+        from click.shell_completion import _resolve_context
+
+        def resolve_ctx(cli, prog_name, args):
+            return _resolve_context(cli, {}, prog_name, args)
 
     def get_choices(cli, prog_name, args, incomplete):
         """
