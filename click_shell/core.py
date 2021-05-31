@@ -16,6 +16,7 @@ import click
 
 from ._compat import get_choices
 from .cmd import ClickCmd
+from . import exceptions
 
 logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
@@ -48,6 +49,10 @@ def get_invoke(command: click.Command) -> Callable[[ClickCmd, str], bool]:
             # Catch this an return the code instead. All of click's help commands do a sys.exit(),
             # and that's not ideal when running in a shell.
             pass
+        except exceptions.ClickShellCleanExit as e:
+            e.clean_exit()
+        except exceptions.ClickShellUncleanExit as e:
+            e.unclean_exit()
         except Exception as e:
             traceback.print_exception(type(e), e, None)
             logger.warning(traceback.format_exc())

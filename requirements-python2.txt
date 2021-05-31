@@ -4,3 +4,4 @@ pylint
 pytest
 pytest-click<1.0
 pytest-cov
+mock
