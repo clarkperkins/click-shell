@@ -8,3 +8,6 @@ else
   pip install pipenv --upgrade
   pipenv install --deploy --dev
 fi
+
+# install the correct version of click for testing
+pip install "click~=$CLICK_VERSION"
