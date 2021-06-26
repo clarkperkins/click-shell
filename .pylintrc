@@ -146,7 +146,10 @@ disable=print-statement,
         logging-fstring-interpolation,
         missing-docstring,
         no-else-return,
-        too-few-public-methods
+        too-few-public-methods,
+        super-with-arguments,
+        useless-object-inheritance,
+        keyword-arg-before-vararg
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
