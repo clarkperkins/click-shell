@@ -3,11 +3,21 @@ os: linux
 dist: bionic
 
 python:
-  - "2.7"
-  - "3.5"
-  - "3.6"
-  - "3.7"
+  - "3.9"
   - "3.8"
+  - "3.7"
+  - "3.6"
+  - "2.7"
+
+env:
+  - CLICK_VERSION="8.0"
+  - CLICK_VERSION="7.0"
+
+# click 8 doesn't support python2
+jobs:
+  exclude:
+  - python: "2.7"
+    env: CLICK_VERSION="8.0"
 
 cache: pip
 
@@ -41,4 +51,4 @@ deploy:
     on:
       tags: true
       repo: clarkperkins/click-shell
-      python: '3.5'
+      python: '3.9'
