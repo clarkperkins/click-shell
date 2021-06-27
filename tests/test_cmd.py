@@ -138,25 +138,6 @@ def test_exit(cli_runner):
     os.remove('.history')
 
 
-def test_on_finished(cli_runner):
-    with cli_runner.isolation() as outstreams:
-        def finisher(c: click.Context):
-            click.echo(c.command.name + '#finished')
-
-        ctx = click.Context(click.Command("dummy-command"))
-
-        cmd = ClickCmd(ctx=ctx, hist_file='.history', on_finished=finisher)
-
-        cmd.cmdloop()
-
-        output = outstreams[0].getvalue() \
-            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
-
-    assert output == ClickCmd.prompt + '\ndummy-command#finished\n'
-
-    os.remove('.history')
-
-
 def test_root_help_basic(cli_runner):
     with cli_runner.isolation(input='help\n') as outstreams:
         cmd = ClickCmd(hist_file='.history')

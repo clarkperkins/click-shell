@@ -10,7 +10,7 @@ import traceback
 import types
 from functools import update_wrapper
 from logging import NullHandler
-from typing import Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union
 
 import click
 
@@ -166,7 +166,8 @@ class Shell(click.Group):
         super().__init__(**attrs)
 
         # Make our shell
-        self.shell = ClickShell(hist_file=hist_file, on_finished=on_finished)
+        self.shell = ClickShell(hist_file=hist_file)
+        self.on_finished: Optional[Callable[[click.Context], None]] = on_finished
         if prompt:
             self.shell.prompt = prompt
         self.shell.intro = intro
@@ -182,19 +183,24 @@ class Shell(click.Group):
         # Add the command to the shell
         self.shell.add_command(cmd, name)
 
-    def invoke(self, ctx: click.Context):
+    def invoke(self, ctx: click.Context) -> Any:
         # Call super() first.  This ensures that we call the method body of our instance first,
         # in case it's something other than `pass`
         ret = super().invoke(ctx)
 
-        if not ctx.protected_args and not ctx.invoked_subcommand:
-            # Set this to None so that it doesn't get printed out in usage messages
-            ctx.info_name = None
+        try:
+            if not ctx.protected_args and not ctx.invoked_subcommand:
+                # Set this to None so that it doesn't get printed out in usage messages
+                ctx.info_name = None
 
-            # Set the context on the shell
-            self.shell.ctx = ctx
+                # Set the context on the shell
+                self.shell.ctx = ctx
 
-            # Start up the shell
-            return self.shell.cmdloop()
+                # Start up the shell
+                self.shell.cmdloop()
+        finally:
+            # Finisher callback on the context
+            if self.on_finished:
+                self.on_finished(ctx)
 
         return ret

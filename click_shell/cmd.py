@@ -33,7 +33,6 @@ class ClickCmd(Cmd):
     def __init__(
             self,
             ctx: Optional[click.Context] = None,
-            on_finished: Optional[Callable[[click.Context], None]] = None,
             hist_file: Optional[str] = None,
             *args,
             **kwargs,
@@ -49,7 +48,6 @@ class ClickCmd(Cmd):
 
         # We need to save the context!!
         self.ctx: Optional[click.Context] = ctx
-        self.on_finished: Optional[Callable[[click.Context], None]] = on_finished
 
         # Set the history file
         hist_file = hist_file or os.path.join(os.path.expanduser('~'), '.click-history')
@@ -75,10 +73,6 @@ class ClickCmd(Cmd):
                 readline.write_history_file(self.hist_file)
             except IOError:
                 pass
-
-        # Finisher callback on the context
-        if self.on_finished:
-            self.on_finished(self.ctx)
 
     # We need to override this to fix readline
     def cmdloop(self, intro: str = None):  # pylint: disable=too-many-branches
