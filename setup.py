@@ -26,7 +26,7 @@ SHORT_DESCRIPTION = "An extension to click that easily turns your click app into
 LONG_DESCRIPTION = read('README.rst')
 
 requirements = [
-    'click>=6.0',
+    'click>=7.0',
 ]
 
 setup(
@@ -55,9 +55,7 @@ setup(
         'Topic :: Software Development :: User Interfaces',
         'Topic :: System :: Shells',
         'Topic :: Utilities',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python'
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

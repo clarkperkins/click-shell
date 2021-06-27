@@ -7,19 +7,19 @@ This module overrides the builtin python cmd module
 import inspect
 import os
 from cmd import Cmd
+from typing import Any, Callable, List, Optional
 
 import click
 
-from click_shell._compat import readline, get_input
+from ._compat import readline
 
 
-class ClickCmd(Cmd, object):
+class ClickCmd(Cmd):
     """
     A simple wrapper around the builtin python cmd module that:
     1) makes completion work on OSX
     2) uses a history file
     3) uses click.echo instead of std*.write()
-    4) turns Cmd into a new-style python object :)
     """
 
     # Allow dashes
@@ -28,7 +28,14 @@ class ClickCmd(Cmd, object):
     nohelp = "No help on %s"
     nocommand = "Command not found: %s"
 
-    def __init__(self, ctx=None, on_finished=None, hist_file=None, *args, **kwargs):
+    def __init__(
+            self,
+            ctx: Optional[click.Context] = None,
+            on_finished: Optional[Callable[[click.Context], None]] = None,
+            hist_file: Optional[str] = None,
+            *args,
+            **kwargs,
+    ):
         # Never allow super() to default to sys.stdout for stdout.
         # Instead pass along a wrapper that delegates to click.echo().
         self._stdout = kwargs.get('stdout')
@@ -39,12 +46,12 @@ class ClickCmd(Cmd, object):
         self.old_delims = None
 
         # We need to save the context!!
-        self.ctx = ctx
-        self.on_finished = on_finished
+        self.ctx: Optional[click.Context] = ctx
+        self.on_finished: Optional[Callable[[click.Context], None]] = on_finished
 
         # Set the history file
         hist_file = hist_file or os.path.join(os.path.expanduser('~'), '.click-history')
-        self.hist_file = os.path.abspath(hist_file)
+        self.hist_file: str = os.path.abspath(hist_file)
 
         # Make the parent directory
         if not os.path.isdir(os.path.dirname(self.hist_file)):
@@ -72,7 +79,7 @@ class ClickCmd(Cmd, object):
             self.on_finished(self.ctx)
 
     # We need to override this to fix readline
-    def cmdloop(self, intro=None):  # pylint: disable=too-many-branches
+    def cmdloop(self, intro: str = None):  # pylint: disable=too-many-branches
         self.preloop()
         if self.completekey and readline:
             self.old_completer = readline.get_completer()
@@ -95,7 +102,7 @@ class ClickCmd(Cmd, object):
                     line = self.cmdqueue.pop(0)
                 else:
                     try:
-                        line = get_input(self.get_prompt())
+                        line = input(self.get_prompt())
                     except EOFError:
                         # We just want to quit here instead of changing the arg to EOF
                         click.echo(file=self._stdout)
@@ -115,7 +122,7 @@ class ClickCmd(Cmd, object):
                 readline.set_completer(self.old_completer)
                 readline.set_completer_delims(self.old_delims)
 
-    def get_prompt(self):
+    def get_prompt(self) -> str:
         if callable(self.prompt):
             kwargs = {}
             if hasattr(inspect, 'signature'):
@@ -126,18 +133,18 @@ class ClickCmd(Cmd, object):
         else:
             return self.prompt
 
-    def emptyline(self):
+    def emptyline(self) -> bool:
         # we don't want to repeat the last command if nothing was typed
         return False
 
-    def default(self, line):
+    def default(self, line: str):
         click.echo(self.nocommand % line, file=self._stdout)
 
-    def get_names(self):
+    def get_names(self) -> List[str]:
         # Do dir(self) instead of dir(self.__class__)
         return dir(self)
 
-    def do_help(self, arg):
+    def do_help(self, arg: str):
         if not arg:
             super(ClickCmd, self).do_help(arg)
             return
@@ -163,13 +170,13 @@ class ClickCmd(Cmd, object):
             return
         func()
 
-    def do_quit(self, arg):  # pylint: disable=unused-argument,no-self-use
+    def do_quit(self, arg) -> bool:  # pylint: disable=unused-argument,no-self-use
         return True
 
-    def do_exit(self, arg):  # pylint: disable=unused-argument,no-self-use
+    def do_exit(self, arg) -> bool:  # pylint: disable=unused-argument,no-self-use
         return True
 
-    def print_topics(self, header, cmds, cmdlen, maxcol):
+    def print_topics(self, header: Any, cmds: List[Any], cmdlen: int, maxcol: int):
         if cmds:
             click.echo(header, file=self._stdout)
             if self.ruler:
