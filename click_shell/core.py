@@ -30,6 +30,7 @@ def get_invoke(command: click.Command) -> Callable[[ClickCmd, str], bool]:
     """
 
     assert isinstance(command, click.Command)
+    assert command.callback
 
     def invoke_(self: ClickCmd, arg: str):  # pylint: disable=unused-argument
         try:
@@ -107,7 +108,7 @@ def get_complete(command: click.Command) -> Callable[[ClickCmd, str, str, int, i
 
         # Then pass them on to the get_choices method that click uses for completion
         return [choice[0] if isinstance(choice, tuple) else choice
-                for choice in get_choices(command, command.name, args, text)]
+                for choice in get_choices(command, command.name or "", args, text)]
 
     complete_.__name__ = 'complete_%s' % command.name
     return complete_
@@ -155,7 +156,7 @@ class Shell(click.Group):
 
     def __init__(
             self,
-            prompt: Optional[Union[str, Callable[[], str], Callable[[click.Context, str], str]]] = None,
+            prompt: Optional[Union[str, Callable[..., str]]] = None,
             intro: Optional[str] = None,
             hist_file: Optional[str] = None,
             on_finished: Optional[Callable[[click.Context], None]] = None,
@@ -175,6 +176,8 @@ class Shell(click.Group):
 
         # Grab the proper name
         name = name or cmd.name
+
+        assert name
 
         # Add the command to the shell
         self.shell.add_command(cmd, name)

@@ -7,7 +7,7 @@ This module overrides the builtin python cmd module
 import inspect
 import os
 from cmd import Cmd
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Union
 
 import click
 
@@ -28,6 +28,8 @@ class ClickCmd(Cmd):
     nohelp = "No help on %s"
     nocommand = "Command not found: %s"
 
+    prompt: Optional[Union[str, Callable[..., str]]] = Cmd.prompt  # type: ignore
+
     def __init__(
             self,
             ctx: Optional[click.Context] = None,
@@ -42,8 +44,8 @@ class ClickCmd(Cmd):
 
         super(ClickCmd, self).__init__(*args, **kwargs)
 
-        self.old_completer = None
-        self.old_delims = None
+        self.old_completer: Optional[Callable] = None
+        self.old_delims: Optional[str] = None
 
         # We need to save the context!!
         self.ctx: Optional[click.Context] = ctx
@@ -84,7 +86,7 @@ class ClickCmd(Cmd):
         if self.completekey and readline:
             self.old_completer = readline.get_completer()
             self.old_delims = readline.get_completer_delims()
-            readline.set_completer(self.complete)
+            readline.set_completer(self.complete)  # type: ignore
             readline.set_completer_delims(' \n\t')
             to_parse = self.completekey + ': complete'
             if readline.__doc__ and 'libedit' in readline.__doc__:
@@ -119,10 +121,12 @@ class ClickCmd(Cmd):
         finally:
             self.postloop()
             if self.completekey and readline:
-                readline.set_completer(self.old_completer)
-                readline.set_completer_delims(self.old_delims)
+                if self.old_completer:
+                    readline.set_completer(self.old_completer)
+                if self.old_delims:
+                    readline.set_completer_delims(self.old_delims)
 
-    def get_prompt(self) -> str:
+    def get_prompt(self) -> Optional[str]:
         if callable(self.prompt):
             kwargs = {}
             if hasattr(inspect, 'signature'):
@@ -176,7 +180,7 @@ class ClickCmd(Cmd):
     def do_exit(self, arg) -> bool:  # pylint: disable=unused-argument,no-self-use
         return True
 
-    def print_topics(self, header: Any, cmds: List[Any], cmdlen: int, maxcol: int):
+    def print_topics(self, header: Any, cmds: Optional[List[str]], cmdlen: int, maxcol: int):
         if cmds:
             click.echo(header, file=self._stdout)
             if self.ruler:
