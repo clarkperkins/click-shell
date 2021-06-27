@@ -22,7 +22,6 @@ try:
     # Click 8
     from click.shell_completion import ShellComplete
 
-
     # Wrapper around the new completion system in click 8
     def get_choices(
             cli: click.BaseCommand,
