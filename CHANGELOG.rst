@@ -1,3 +1,11 @@
+Version 3.0.0 (UNRELEASED)
+------------------------
+
+Released TBD
+
+- Drop support for Python 2
+- Drop support for Click 6
+
 Version 2.1
 -----------
 

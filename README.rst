@@ -61,6 +61,11 @@ When run, you should expect an output like so:
 
 For more advanced usage, check out our docs at https://click-shell.readthedocs.io/
 
+.. note::
+
+    Versions of click-shell 3.0.0 and higher no longer support python 2 and click 6.
+    If you require python 2 or click 6, please remain on click-shell 2.x.
+
 .. _click: http://click.pocoo.org/
 .. _cmd: https://docs.python.org/2/library/cmd.html
 
