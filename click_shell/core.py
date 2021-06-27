@@ -163,7 +163,7 @@ class Shell(click.Group):
             **attrs
     ):
         attrs['invoke_without_command'] = True
-        super(Shell, self).__init__(**attrs)
+        super().__init__(**attrs)
 
         # Make our shell
         self.shell = ClickShell(hist_file=hist_file, on_finished=on_finished)
@@ -172,7 +172,7 @@ class Shell(click.Group):
         self.shell.intro = intro
 
     def add_command(self, cmd: click.Command, name: Optional[str] = None):
-        super(Shell, self).add_command(cmd, name)
+        super().add_command(cmd, name)
 
         # Grab the proper name
         name = name or cmd.name
@@ -185,7 +185,7 @@ class Shell(click.Group):
     def invoke(self, ctx: click.Context):
         # Call super() first.  This ensures that we call the method body of our instance first,
         # in case it's something other than `pass`
-        ret = super(Shell, self).invoke(ctx)
+        ret = super().invoke(ctx)
 
         if not ctx.protected_args and not ctx.invoked_subcommand:
             # Set this to None so that it doesn't get printed out in usage messages
