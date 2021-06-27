@@ -6,6 +6,7 @@ from cmd import Cmd
 import click
 
 from click_shell.cmd import ClickCmd
+from click_shell.core import ClickShell
 
 
 class BadStringIO(io.StringIO):
@@ -139,22 +140,24 @@ def test_exit(cli_runner):
 
 def test_on_finished(cli_runner):
     with cli_runner.isolation() as outstreams:
-        def finisher(c):
-            click.echo(c + '#finished')
+        def finisher(c: click.Context):
+            click.echo(c.command.name + '#finished')
 
-        cmd = ClickCmd(ctx='dummy-ctx', hist_file='.history', on_finished=finisher)
+        ctx = click.Context(click.Command("dummy-command"))
+
+        cmd = ClickCmd(ctx=ctx, hist_file='.history', on_finished=finisher)
 
         cmd.cmdloop()
 
         output = outstreams[0].getvalue() \
             .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
 
-    assert output == ClickCmd.prompt + '\ndummy-ctx#finished\n'
+    assert output == ClickCmd.prompt + '\ndummy-command#finished\n'
 
     os.remove('.history')
 
 
-def test_help(cli_runner):
+def test_root_help_basic(cli_runner):
     with cli_runner.isolation(input='help\n') as outstreams:
         cmd = ClickCmd(hist_file='.history')
 
@@ -168,6 +171,63 @@ def test_help(cli_runner):
                      '======================\n' \
                      'exit  help  quit\n' \
                      '\n' \
+                     '{0}\n'.format(ClickCmd.prompt)
+
+    os.remove('.history')
+
+
+@click.command()
+def sample():
+    """
+    Sample command
+    """
+
+
+def test_root_help_with_command(cli_runner):
+    with cli_runner.isolation(input='help\n') as outstreams:
+        ctx = click.Context(sample)
+
+        cmd = ClickShell(ctx, hist_file='.history')
+        cmd.add_command(sample, sample.name)
+
+        cmd.cmdloop()
+
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
+
+    assert output == '{0}\n' \
+                     'Documented commands (type help <topic>):\n' \
+                     '========================================\n' \
+                     'sample\n' \
+                     '\n' \
+                     'Undocumented commands:\n' \
+                     '======================\n' \
+                     'exit  help  quit\n' \
+                     '\n' \
+                     '{0}\n'.format(ClickCmd.prompt)
+
+    os.remove('.history')
+
+
+def test_command_help(cli_runner):
+    with cli_runner.isolation(input='help sample\n') as outstreams:
+        ctx = click.Context(sample)
+
+        cmd = ClickShell(ctx, hist_file='.history')
+        cmd.add_command(sample, sample.name)
+
+        cmd.cmdloop()
+
+        output = outstreams[0].getvalue() \
+            .decode(cli_runner.charset, 'replace').replace('\r\n', '\n')
+
+    assert output == '{0}' \
+                     'Usage: sample [OPTIONS]\n' \
+                     '\n' \
+                     '  Sample command\n' \
+                     '\n' \
+                     'Options:\n' \
+                     '  --help  Show this message and exit.\n' \
                      '{0}\n'.format(ClickCmd.prompt)
 
     os.remove('.history')
