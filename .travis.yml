@@ -7,17 +7,10 @@ python:
   - "3.8"
   - "3.7"
   - "3.6"
-  - "2.7"
 
 env:
   - CLICK_VERSION="8.0"
   - CLICK_VERSION="7.0"
-
-# click 8 doesn't support python2
-jobs:
-  exclude:
-  - python: "2.7"
-    env: CLICK_VERSION="8.0"
 
 cache: pip
 

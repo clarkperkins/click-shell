@@ -7,19 +7,21 @@ Core functionality for click-shell
 import logging
 import shlex
 import traceback
+import types
 from functools import update_wrapper
 from logging import NullHandler
+from typing import Callable, List, Optional, Union
 
 import click
 
-from ._cmd import ClickCmd
-from ._compat import get_method_type, get_choices
+from ._compat import get_choices
+from .cmd import ClickCmd
 
 logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
 
 
-def get_invoke(command):
+def get_invoke(command: click.Command) -> Callable[[ClickCmd, str], bool]:
     """
     Get the Cmd main method from the click command
     :param command: The click Command object
@@ -29,7 +31,7 @@ def get_invoke(command):
 
     assert isinstance(command, click.Command)
 
-    def invoke_(self, arg):  # pylint: disable=unused-argument
+    def invoke_(self: ClickCmd, arg: str):  # pylint: disable=unused-argument
         try:
             command.main(args=shlex.split(arg),
                          prog_name=command.name,
@@ -57,7 +59,7 @@ def get_invoke(command):
     return invoke_
 
 
-def get_help(command):
+def get_help(command: click.Command) -> Callable[[ClickCmd], None]:
     """
     Get the Cmd help function from the click command
     :param command: The click Command object
@@ -66,7 +68,7 @@ def get_help(command):
     """
     assert isinstance(command, click.Command)
 
-    def help_(self):  # pylint: disable=unused-argument
+    def help_(self: ClickCmd):  # pylint: disable=unused-argument
         extra = {}
         for key, value in command.context_settings.items():
             if key not in extra:
@@ -80,7 +82,7 @@ def get_help(command):
     return help_
 
 
-def get_complete(command):
+def get_complete(command: click.Command) -> Callable[[ClickCmd, str, str, int, int], List[str]]:
     """
     Get the Cmd complete function for the click command
     :param command: The click Command object
@@ -90,7 +92,14 @@ def get_complete(command):
 
     assert isinstance(command, click.Command)
 
-    def complete_(self, text, line, begidx, endidx):  # pylint: disable=unused-argument
+    # pylint: disable=unused-argument
+    def complete_(
+            self: ClickCmd,
+            text: str,
+            line: str,
+            begidx: int,
+            endidx: int,
+    ):
         # Parse the args
         args = shlex.split(line[:begidx])
         # Strip of the first item which is the name of the command
@@ -106,14 +115,19 @@ def get_complete(command):
 
 class ClickShell(ClickCmd):
 
-    def add_command(self, cmd, name):
+    def add_command(self, cmd: click.Command, name: str):
         # Use the MethodType to add these as bound methods to our current instance
-        setattr(self, 'do_%s' % name, get_method_type(get_invoke(cmd), self))
-        setattr(self, 'help_%s' % name, get_method_type(get_help(cmd), self))
-        setattr(self, 'complete_%s' % name, get_method_type(get_complete(cmd), self))
+        setattr(self, 'do_%s' % name, types.MethodType(get_invoke(cmd), self))
+        setattr(self, 'help_%s' % name, types.MethodType(get_help(cmd), self))
+        setattr(self, 'complete_%s' % name, types.MethodType(get_complete(cmd), self))
 
 
-def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
+def make_click_shell(
+        ctx: click.Command,
+        prompt: Optional[Union[str, Callable[[], str], Callable[[click.Context, str], str]]] = None,
+        intro: Optional[str] = None,
+        hist_file: Optional[str] = None,
+):
     assert isinstance(ctx, click.Context)
     assert isinstance(ctx.command, click.MultiCommand)
 
@@ -139,7 +153,14 @@ def make_click_shell(ctx, prompt=None, intro=None, hist_file=None):
 
 class Shell(click.Group):
 
-    def __init__(self, prompt=None, intro=None, hist_file=None, on_finished=None, **attrs):
+    def __init__(
+            self,
+            prompt: Optional[Union[str, Callable[[], str], Callable[[click.Context, str], str]]] = None,
+            intro: Optional[str] = None,
+            hist_file: Optional[str] = None,
+            on_finished: Optional[Callable[[click.Context], None]] = None,
+            **attrs
+    ):
         attrs['invoke_without_command'] = True
         super(Shell, self).__init__(**attrs)
 
@@ -149,7 +170,7 @@ class Shell(click.Group):
             self.shell.prompt = prompt
         self.shell.intro = intro
 
-    def add_command(self, cmd, name=None):
+    def add_command(self, cmd: click.Command, name: Optional[str] = None):
         super(Shell, self).add_command(cmd, name)
 
         # Grab the proper name
@@ -158,7 +179,7 @@ class Shell(click.Group):
         # Add the command to the shell
         self.shell.add_command(cmd, name)
 
-    def invoke(self, ctx):
+    def invoke(self, ctx: click.Context):
         # Call super() first.  This ensures that we call the method body of our instance first,
         # in case it's something other than `pass`
         ret = super(Shell, self).invoke(ctx)

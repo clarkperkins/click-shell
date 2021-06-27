@@ -1,19 +1,14 @@
+import io
 import os
 import sys
 from cmd import Cmd
 
 import click
 
-from click_shell._cmd import ClickCmd
-from click_shell._compat import PY2
-
-if PY2:
-    from StringIO import StringIO
-else:
-    from io import StringIO
+from click_shell.cmd import ClickCmd
 
 
-class BadStringIO(StringIO, object):
+class BadStringIO(io.StringIO):
     def __init__(self, *args, **kwargs):
         super(BadStringIO, self).__init__(*args, **kwargs)
         self.first = True
@@ -36,9 +31,6 @@ def test_create():
 
     # Make sure it's a Cmd
     assert isinstance(cmd, Cmd)
-
-    # Make sure it's a new-style class
-    assert isinstance(cmd, object)
 
     # Make sure we have our exit functions
     assert hasattr(cmd, 'do_quit')
@@ -183,7 +175,7 @@ def test_help(cli_runner):
 
 def test_keyboard_interrupt():
     stdin = BadStringIO()
-    stdout = StringIO()
+    stdout = io.StringIO()
 
     old_in = sys.stdin
     old_out = sys.stdout
@@ -208,7 +200,7 @@ def test_changable_prompt(cli_runner):
 
         cmd = ClickCmd(hist_file='.history')
 
-        class Prompt(object):
+        class Prompt:
 
             def __init__(self):
                 self.num = 0

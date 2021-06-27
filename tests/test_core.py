@@ -4,11 +4,11 @@ from datetime import datetime
 import click
 import pytest
 
-from click_shell._cmd import ClickCmd
+from click_shell.cmd import ClickCmd
 from click_shell.core import Shell, make_click_shell, get_invoke
 
 
-class TestShell(object):
+class TestShell:
 
     def test_create(self):
 
@@ -40,7 +40,7 @@ class TestShell(object):
         assert retcode == 0
 
 
-class TestFactory(object):
+class TestFactory:
 
     def test_fail_on_bad_command(self):
         command = click.Command('test-command')
