@@ -1,3 +1,12 @@
+Version 2.1
+-----------
+
+Released 2021-06-26
+
+- Drop support for Python 3.5
+- Add support for Python 3.9
+- Add support for Click 8
+
 Version 2.0
 -----------
 
