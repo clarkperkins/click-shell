@@ -26,6 +26,7 @@ Features
    usage
    changelog
    troubleshooting
+   click-repl
 
 
 .. _click: https://click.palletsprojects.com/
