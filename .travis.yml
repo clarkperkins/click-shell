@@ -52,3 +52,4 @@ deploy:
       tags: true
       repo: clarkperkins/click-shell
       python: '3.9'
+      env: CLICK_VERSION="8.0"
