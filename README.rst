@@ -64,7 +64,7 @@ For more advanced usage, check out our docs at https://click-shell.readthedocs.i
 .. _click: http://click.pocoo.org/
 .. _cmd: https://docs.python.org/2/library/cmd.html
 
-.. |TravisCI| image:: https://travis-ci.com/clarkperkins/click-shell.svg?branch=master
+.. |TravisCI| image:: https://travis-ci.com/clarkperkins/click-shell.svg?branch=main
     :target: https://travis-ci.com/clarkperkins/click-shell
     :alt: Build status
 
