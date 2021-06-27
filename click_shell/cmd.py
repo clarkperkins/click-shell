@@ -42,7 +42,7 @@ class ClickCmd(Cmd):
         # Instead pass along a wrapper that delegates to click.echo().
         self._stdout = kwargs.get('stdout')
 
-        super(ClickCmd, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.old_completer: Optional[Callable] = None
         self.old_delims: Optional[str] = None
@@ -150,7 +150,7 @@ class ClickCmd(Cmd):
 
     def do_help(self, arg: str):
         if not arg:
-            super(ClickCmd, self).do_help(arg)
+            super().do_help(arg)
             return
 
         # Override to give better error message
