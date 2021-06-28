@@ -54,9 +54,12 @@ When run with the above arguments, you should expect an output like so:
   Defaults to ``'~/.click-history'``
 - ``on_finished`` - a callable that will be called when the shell exits.
   You can use it to clean up any resources that may need cleaning up.
+- ``shell_cls`` - a subclass of ``click_shell.ClickShell`` used to build the shell.
+  You can use this to add custom implementations of methods from the python ``Cmd`` class.
 
 ``@shell`` also takes arbitrary keyword arguments, and they are passed on directly to the
-constructor for the `click_shell.Shell`` class.
+constructor for the ``click_shell.Shell`` class (and therefore passed along to the
+``click.Group`` constructor, as ``click_shell.Shell`` inherits from ``click.Group``).
 
 
 Factory Method
@@ -85,5 +88,5 @@ object and start it up:
 
 
 The first argument passed to ``make_click_shell`` must be the root level context object for
-your click application.  The other 3 args (prompt, intro, hist_file) are the same as described
+your click application.  The other 3 args (prompt, intro, hist_file, shell_cls) are the same as described
 above under the Decorator section.

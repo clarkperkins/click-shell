@@ -10,7 +10,7 @@ import traceback
 import types
 from functools import update_wrapper
 from logging import NullHandler
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Type, Union
 
 import click
 
@@ -128,7 +128,8 @@ def make_click_shell(
         prompt: Optional[Union[str, Callable[[], str], Callable[[click.Context, str], str]]] = None,
         intro: Optional[str] = None,
         hist_file: Optional[str] = None,
-):
+        shell_cls: Type[ClickShell] = ClickShell,
+) -> ClickShell:
     assert isinstance(ctx, click.Context)
     assert isinstance(ctx.command, click.MultiCommand)
 
@@ -136,7 +137,7 @@ def make_click_shell(
     ctx.info_name = None
 
     # Create our shell object
-    shell = ClickShell(ctx=ctx, hist_file=hist_file)
+    shell = shell_cls(ctx=ctx, hist_file=hist_file)
 
     if prompt is not None:
         shell.prompt = prompt
@@ -160,13 +161,14 @@ class Shell(click.Group):
             intro: Optional[str] = None,
             hist_file: Optional[str] = None,
             on_finished: Optional[Callable[[click.Context], None]] = None,
+            shell_cls: Type[ClickShell] = ClickShell,
             **attrs
     ):
         attrs['invoke_without_command'] = True
         super().__init__(**attrs)
 
         # Make our shell
-        self.shell = ClickShell(hist_file=hist_file)
+        self.shell: ClickShell = shell_cls(hist_file=hist_file)
         self.on_finished: Optional[Callable[[click.Context], None]] = on_finished
         if prompt:
             self.shell.prompt = prompt
