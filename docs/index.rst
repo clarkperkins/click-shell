@@ -24,6 +24,7 @@ Features
 
    install
    usage
+   exceptions
    changelog
    troubleshooting
    click-repl
