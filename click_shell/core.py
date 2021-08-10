@@ -34,10 +34,11 @@ def get_invoke(command: click.Command) -> Callable[[ClickCmd, str], bool]:
 
     def invoke_(self: ClickCmd, arg: str):  # pylint: disable=unused-argument
         try:
-            command.main(args=shlex.split(arg),
-                         prog_name=command.name,
-                         standalone_mode=False,
-                         parent=self.ctx)
+            self.ctx.return_code = 0  # Set initial code
+            self.ctx.return_code = command.main(args=shlex.split(arg),
+                                                prog_name=command.name,
+                                                standalone_mode=False,
+                                                parent=self.ctx)
         except click.ClickException as e:
             # Show the error message
             e.show()
