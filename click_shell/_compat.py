@@ -67,6 +67,18 @@ except ImportError:
                 choices.extend(param.secondary_opts)
         elif isinstance(ctx.command, click.MultiCommand):
             choices.extend(ctx.command.list_commands(ctx))
+        elif isinstance(ctx.command, click.Command):
+            nargs = 0
+            only_args = []
+            for param in ctx.command.params:
+                if not isinstance(param, click.Argument):
+                    continue
+                only_args.append(param)
+            if len(args) < len(only_args):
+                param = only_args[len(args)]
+                if param._custom_shell_complete is not None:
+                    choices.extend(param._custom_shell_complete(ctx, param, incomplete))
+                     
 
         for item in choices:
             if item.startswith(incomplete):
