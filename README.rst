@@ -58,6 +58,24 @@ When run, you should expect an output like so:
     (like ``python my_app.py the_command`` in the above example), your app will function
     identically to how it did before.
 
+History Configuration
+---------------------
+
+click-shell uses `readline` to keep track of your command history. By default, it saves up to 1000 commands in ``~/.click-history``.
+
+You can change this behavior via arguments to ``@shell`` or ``make_click_shell``:
+
+.. code-block:: python
+
+    @shell(prompt='my-app > ', hist_file='/path/to/my/history', hist_max_len=5000)
+    def my_app():
+        pass
+
+Alternatively, you can override these values without changing your code by setting environment variables:
+
+* ``CLICK_SHELL_HIST_FILE``: The location of the history file.
+* ``CLICK_SHELL_HIST_MAX_LEN``: The maximum number of items to keep in history.
+
 
 For more advanced usage, check out our docs at https://click-shell.readthedocs.io/
 

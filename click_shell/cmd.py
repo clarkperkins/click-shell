@@ -6,6 +6,7 @@ This module overrides the builtin python cmd module
 
 import inspect
 import os
+import re
 from cmd import Cmd
 from typing import Any, Callable, List, Optional, Union
 
@@ -34,6 +35,7 @@ class ClickCmd(Cmd):
             self,
             ctx: Optional[click.Context] = None,
             hist_file: Optional[str] = None,
+            hist_max_len: int = 1000,
             *args,
             **kwargs,
     ):
@@ -50,8 +52,17 @@ class ClickCmd(Cmd):
         self.ctx: Optional[click.Context] = ctx
 
         # Set the history file
-        hist_file = hist_file or os.path.join(os.path.expanduser('~'), '.click-history')
+        hist_file = hist_file or os.environ.get('CLICK_SHELL_HIST_FILE') or os.path.join(os.path.expanduser('~'), '.click-history')
         self.hist_file: str = os.path.abspath(hist_file)
+        
+        env_hist_max_len = os.environ.get('CLICK_SHELL_HIST_MAX_LEN')
+        if env_hist_max_len is not None:
+            try:
+                self.hist_max_len: int = int(env_hist_max_len)
+            except ValueError:
+                self.hist_max_len: int = hist_max_len
+        else:
+            self.hist_max_len: int = hist_max_len
 
         # Make the parent directory
         if not os.path.isdir(os.path.dirname(self.hist_file)):
@@ -68,7 +79,7 @@ class ClickCmd(Cmd):
     def postloop(self):
         # Write our history
         if readline:
-            readline.set_history_length(1000)
+            readline.set_history_length(self.hist_max_len)
             try:
                 readline.write_history_file(self.hist_file)
             except IOError:
@@ -121,15 +132,37 @@ class ClickCmd(Cmd):
                     readline.set_completer_delims(self.old_delims)
 
     def get_prompt(self) -> Optional[str]:
+        prompt = None
         if callable(self.prompt):
             kwargs = {}
             if hasattr(inspect, 'signature'):
                 sig = inspect.signature(self.prompt)
                 if 'ctx' in sig.parameters:
                     kwargs['ctx'] = self.ctx
-            return self.prompt(**kwargs)
+            prompt = self.prompt(**kwargs)
         else:
-            return self.prompt
+            prompt = self.prompt
+
+        return self._fix_prompt(prompt)
+
+    def _fix_prompt(self, prompt: Optional[str]) -> Optional[str]:
+        if not prompt or not readline:
+            return prompt
+
+        # Don't wrap if we're using pyreadline
+        if 'pyreadline' in getattr(readline, '__name__', ''):
+            return prompt
+
+        # Readline has a bug where it fails to clear the reverse-i-search prompt
+        # if the prompt ends with invisible characters (like a color reset code).
+        # We swap trailing spaces with the reset code so the prompt ends with a space.
+        prompt = re.sub(r'( +)(\x1b\[0m)$', r'\2\1', prompt)
+
+        # This matches most ANSI escape sequences that are not already wrapped with \x01 and \x02
+        # See https://github.com/vittorio/click-shell/issues/23
+        pattern = r'(?<!\x01)(\x1b\[[0-9;]*[a-zA-Z])(?!\x02)'
+
+        return re.sub(pattern, lambda m: '\x01' + m.group(1) + '\x02', prompt)
 
     def emptyline(self) -> bool:
         # we don't want to repeat the last command if nothing was typed
