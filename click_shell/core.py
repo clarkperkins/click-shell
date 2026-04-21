@@ -128,6 +128,7 @@ def make_click_shell(
         prompt: Optional[Union[str, Callable[[], str], Callable[[click.Context, str], str]]] = None,
         intro: Optional[str] = None,
         hist_file: Optional[str] = None,
+        hist_max_len: int = 1000,
         shell_cls: Type[ClickShell] = ClickShell,
 ) -> ClickShell:
     assert isinstance(ctx, click.Context)
@@ -137,7 +138,7 @@ def make_click_shell(
     ctx.info_name = None
 
     # Create our shell object
-    shell = shell_cls(ctx=ctx, hist_file=hist_file)
+    shell = shell_cls(ctx=ctx, hist_file=hist_file, hist_max_len=hist_max_len)
 
     if prompt is not None:
         shell.prompt = prompt
@@ -160,6 +161,7 @@ class Shell(click.Group):
             prompt: Optional[Union[str, Callable[..., str]]] = None,
             intro: Optional[str] = None,
             hist_file: Optional[str] = None,
+            hist_max_len: int = 1000,
             on_finished: Optional[Callable[[click.Context], None]] = None,
             shell_cls: Type[ClickShell] = ClickShell,
             **attrs
@@ -168,7 +170,7 @@ class Shell(click.Group):
         super().__init__(**attrs)
 
         # Make our shell
-        self.shell: ClickShell = shell_cls(hist_file=hist_file)
+        self.shell: ClickShell = shell_cls(hist_file=hist_file, hist_max_len=hist_max_len)
         self.on_finished: Optional[Callable[[click.Context], None]] = on_finished
         if prompt:
             self.shell.prompt = prompt

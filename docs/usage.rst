@@ -51,7 +51,9 @@ When run with the above arguments, you should expect an output like so:
 - ``intro`` - this will get printed once when the shell first starts
   Defaults to ``None``, meaning nothing gets printed
 - ``hist_file`` - this is the location of the history file used by the shell.
-  Defaults to ``'~/.click-history'``
+  Defaults to ``'~/.click-history'``. Can also be overridden with the ``CLICK_SHELL_HIST_FILE`` environment variable.
+- ``hist_max_len`` - the maximum number of commands to save in the history file.
+  Defaults to ``1000``. Can also be overridden with the ``CLICK_SHELL_HIST_MAX_LEN`` environment variable.
 - ``on_finished`` - a callable that will be called when the shell exits.
   You can use it to clean up any resources that may need cleaning up.
 - ``shell_cls`` - a subclass of ``click_shell.ClickShell`` used to build the shell.
@@ -88,5 +90,5 @@ object and start it up:
 
 
 The first argument passed to ``make_click_shell`` must be the root level context object for
-your click application.  The other 3 args (prompt, intro, hist_file, shell_cls) are the same as described
+your click application.  The other 4 args (prompt, intro, hist_file, hist_max_len, shell_cls) are the same as described
 above under the Decorator section.
